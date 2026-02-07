@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { supportedLangs, type Lang, normalizeLang } from "@/lib/i18n";
 import { ChevronDown } from "lucide-react";
 
@@ -36,12 +36,18 @@ export function LangDropdown({
 }) {
   const router = useRouter();
   const pathname = usePathname() || "/fr";
-  const searchParams = useSearchParams();
-  const query = searchParams?.toString() ?? "";
   const lang = normalizeLang(currentLang);
 
   const [open, setOpen] = React.useState(false);
+  const [query, setQuery] = React.useState("");
   const rootRef = React.useRef<HTMLDivElement | null>(null);
+
+  React.useEffect(() => {
+    // Avoid useSearchParams() to keep static builds happy (Vercel/Next can require Suspense).
+    // Read the current query from the browser only.
+    if (typeof window === "undefined") return;
+    setQuery(window.location.search.replace(/^\?/, ""));
+  }, [pathname]);
 
   React.useEffect(() => {
     const onDown = (e: MouseEvent) => {
