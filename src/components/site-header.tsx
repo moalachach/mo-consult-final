@@ -63,7 +63,14 @@ export function SiteHeader({ lang }: { lang: string }) {
 
         {/* Right: language + CTA */}
         <div className="flex flex-1 items-center justify-end gap-3">
-          <LangDropdown currentLang={safeLang} className="hidden md:block" />
+          {/* Next.js requires a Suspense boundary for components using useSearchParams(). */}
+          <React.Suspense
+            fallback={
+              <div className="hidden h-9 w-[72px] rounded-2xl border border-sand bg-white/60 md:block" />
+            }
+          >
+            <LangDropdown currentLang={safeLang} className="hidden md:block" />
+          </React.Suspense>
           <Link
             href={`/${safeLang}/espace-client`}
             className="hidden md:inline-flex"
@@ -139,7 +146,13 @@ export function SiteHeader({ lang }: { lang: string }) {
               </div>
 
               <div className="mt-4 flex items-center justify-between gap-3">
-                <LangDropdown currentLang={safeLang} align="left" />
+                <React.Suspense
+                  fallback={
+                    <div className="h-9 w-[72px] rounded-2xl border border-sand bg-white/60" />
+                  }
+                >
+                  <LangDropdown currentLang={safeLang} align="left" />
+                </React.Suspense>
               </div>
 
               <div className="mt-4 grid justify-items-stretch gap-3">
