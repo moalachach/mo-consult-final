@@ -25,37 +25,48 @@ const content = {
     badge: "Votre partenaire pour entreprendre en Belgique",
     h1: "Créez votre entreprise en ligne. On s’occupe du reste.",
     subline: "Vous remplissez. Nous préparons. Vous démarrez.",
-    primaryCta: "Créer mon entreprise",
-    secondaryCta: "Voir comment ça marche",
-    trust: ["Plan financier inclus", "Dossier notaire inclus", "Paiement sécurisé"],
-    offersTitle: "Choisissez votre situation",
-    srl: {
-      title: "Créer une SRL",
-      price: "1.250 € – Honoraires Mo Consult",
-      bullets: [
-        "Plan financier – Nous construisons votre plan pour le notaire",
-        "Notaire – Nous préparons le dossier et le transmettons",
-        "Banque – Aide pour dépôt de capital et attestation",
-        "Affiliation de la société – Nous enregistrons votre société",
-      ],
-      bottom: "Mo Consult s’occupe des démarches, vous restez concentré sur votre projet.",
-      cta: "Créer ma SRL",
-    },
-    pp: {
-      title: "Indépendant en nom propre",
-      price: "200 € – Honoraires Mo Consult",
-      bullets: [
-        "Inscription comme indépendant",
-        "Numéro TVA si besoin",
-        "Caisse sociale",
-        "Conseils de démarrage",
-      ],
-      bottom: "Mo Consult vous accompagne tout au long du processus.",
-      cta: "Devenir indépendant",
-    },
-    processTitle: "Le processus, simplement",
-    servicesTitle: "Nos services",
-    services: [
+	    primaryCta: "Créer mon entreprise",
+	    secondaryCta: "Voir comment ça marche",
+	    trust: ["Plan financier inclus", "Dossier notaire inclus", "Paiement sécurisé"],
+	    offersTitle: "Choisissez votre situation",
+	    packsCta: "Choisir ce pack",
+	    packs: [
+	      {
+	        id: "base",
+	        title: "Pack A — Création (base)",
+	        price: "À partir de 200€",
+	        idealFor: "Idéal pour démarrer vite et clair.",
+	        bullets: ["Dossier complet", "Suivi en ligne", "Support humain"],
+	        recommended: false,
+	      },
+	      {
+	        id: "branding",
+	        title: "Pack B — Création + Charte graphique",
+	        price: "À partir de 600€",
+	        idealFor: "Idéal pour lancer une marque solide.",
+	        bullets: ["Logo + charte PDF", "Variantes de logo", "Kit réseaux sociaux (base)"],
+	        recommended: false,
+	      },
+	      {
+	        id: "domiciliation",
+	        title: "Pack C — Création + Domiciliation",
+	        price: "Sur devis",
+	        idealFor: "Idéal si vous n’avez pas encore d’adresse pro.",
+	        bullets: ["Siège social", "Unité d’établissement", "Accompagnement administratif"],
+	        recommended: true,
+	      },
+	      {
+	        id: "partners",
+	        title: "Pack D — Pack Partenaires",
+	        price: "Sur devis",
+	        idealFor: "Idéal si vous voulez tout centraliser.",
+	        bullets: ["Comptable + design + domiciliation", "Devis coordonné", "Un seul interlocuteur"],
+	        recommended: false,
+	      },
+	    ],
+	    processTitle: "Le processus, simplement",
+	    servicesTitle: "Nos services",
+	    services: [
       {
         title: "Création d’entreprise",
         lead: "SRL ou indépendant: un parcours guidé et un suivi clair.",
@@ -142,31 +153,47 @@ const content = {
     h1: "Richt uw bedrijf online op. Wij regelen de rest.",
     subline: "U vult in. Wij bereiden voor. U start.",
     primaryCta: "Start mijn bedrijf",
-    secondaryCta: "Bekijk hoe het werkt",
-    trust: ["Financieel plan inbegrepen", "Notarisdossier inbegrepen", "Veilige betaling"],
-    offersTitle: "Kies uw situatie",
-    srl: {
-      title: "Een SRL oprichten",
-      price: "1.250 € – Honoraria Mo Consult",
-      bullets: [
-        "Financieel plan – We maken uw plan voor de notaris",
-        "Notaris – We bereiden het dossier voor en sturen het door",
-        "Bank – Hulp bij kapitaalstorting en attest",
-        "Registratie – We registreren uw vennootschap",
-      ],
-      bottom: "Mo Consult regelt de stappen, u blijft gefocust op uw project.",
-      cta: "Start mijn SRL",
-    },
-    pp: {
-      title: "Zelfstandige in eigen naam",
-      price: "200 € – Honoraria Mo Consult",
-      bullets: ["Inschrijving", "BTW-nummer indien nodig", "Sociaal fonds", "Startadvies"],
-      bottom: "Mo Consult begeleidt u tijdens het hele proces.",
-      cta: "Word zelfstandige",
-    },
-    processTitle: "Het proces, eenvoudig",
-    servicesTitle: "Onze diensten",
-    services: [
+	    secondaryCta: "Bekijk hoe het werkt",
+	    trust: ["Financieel plan inbegrepen", "Notarisdossier inbegrepen", "Veilige betaling"],
+	    offersTitle: "Kies uw situatie",
+	    packsCta: "Kies dit pack",
+	    packs: [
+	      {
+	        id: "base",
+	        title: "Pack A — Oprichting (basis)",
+	        price: "Vanaf €200",
+	        idealFor: "Ideaal om snel en duidelijk te starten.",
+	        bullets: ["Volledig dossier", "Online opvolging", "Menselijke ondersteuning"],
+	        recommended: false,
+	      },
+	      {
+	        id: "branding",
+	        title: "Pack B — Oprichting + huisstijl",
+	        price: "Vanaf €600",
+	        idealFor: "Ideaal voor een sterke merkstart.",
+	        bullets: ["Logo + PDF-huisstijl", "Logo varianten", "Social kit (basis)"],
+	        recommended: false,
+	      },
+	      {
+	        id: "domiciliation",
+	        title: "Pack C — Oprichting + domicilie",
+	        price: "Offerte",
+	        idealFor: "Ideaal als u nog geen professioneel adres hebt.",
+	        bullets: ["Maatschappelijke zetel", "Vestigingseenheid", "Administratieve begeleiding"],
+	        recommended: true,
+	      },
+	      {
+	        id: "partners",
+	        title: "Pack D — Partnerpack",
+	        price: "Offerte",
+	        idealFor: "Ideaal als u alles wilt centraliseren.",
+	        bullets: ["Accountant + design + domicilie", "Gecombineerde offerte", "Eén aanspreekpunt"],
+	        recommended: false,
+	      },
+	    ],
+	    processTitle: "Het proces, eenvoudig",
+	    servicesTitle: "Onze diensten",
+	    services: [
       {
         title: "Bedrijf oprichten",
         lead: "SRL of zelfstandige: een begeleid traject met duidelijke opvolging.",
@@ -252,36 +279,47 @@ const content = {
     h1: "Create your company online. We handle the rest.",
     subline: "You fill in. We prepare. You start.",
     primaryCta: "Start my company",
-    secondaryCta: "See how it works",
-    trust: ["Financial plan included", "Notary package included", "Secure payment"],
-    offersTitle: "Choose your situation",
-    srl: {
-      title: "Create an SRL",
-      price: "€1,250 – Mo Consult fees",
-      bullets: [
-        "Financial plan – We build your plan for the notary",
-        "Notary – We prepare the file and send it",
-        "Bank – Help with capital deposit and certificate",
-        "Registration – We register your company",
-      ],
-      bottom: "Mo Consult handles the steps so you stay focused on your project.",
-      cta: "Create my SRL",
-    },
-    pp: {
-      title: "Sole proprietor",
-      price: "€200 – Mo Consult fees",
-      bullets: [
-        "Self-employed registration",
-        "VAT number if needed",
-        "Social fund",
-        "Startup guidance",
-      ],
-      bottom: "Mo Consult supports you throughout the process.",
-      cta: "Become self‑employed",
-    },
-    processTitle: "The process, simple",
-    servicesTitle: "Our services",
-    services: [
+	    secondaryCta: "See how it works",
+	    trust: ["Financial plan included", "Notary package included", "Secure payment"],
+	    offersTitle: "Choose your situation",
+	    packsCta: "Choose this pack",
+	    packs: [
+	      {
+	        id: "base",
+	        title: "Pack A — Creation (base)",
+	        price: "From €200",
+	        idealFor: "Best for a quick, clear start.",
+	        bullets: ["Complete file", "Online tracking", "Human support"],
+	        recommended: false,
+	      },
+	      {
+	        id: "branding",
+	        title: "Pack B — Creation + Brand guidelines",
+	        price: "From €600",
+	        idealFor: "Best for launching a strong brand.",
+	        bullets: ["Logo + PDF guidelines", "Logo variants", "Social kit (basic)"],
+	        recommended: false,
+	      },
+	      {
+	        id: "domiciliation",
+	        title: "Pack C — Creation + Domiciliation",
+	        price: "Quote",
+	        idealFor: "Best if you don’t have a business address yet.",
+	        bullets: ["Registered seat", "Establishment unit", "Admin support"],
+	        recommended: true,
+	      },
+	      {
+	        id: "partners",
+	        title: "Pack D — Partners pack",
+	        price: "Quote",
+	        idealFor: "Best if you want everything centralized.",
+	        bullets: ["Accountant + design + domiciliation", "Coordinated quote", "Single point of contact"],
+	        recommended: false,
+	      },
+	    ],
+	    processTitle: "The process, simple",
+	    servicesTitle: "Our services",
+	    services: [
       {
         title: "Company creation",
         lead: "SRL or sole proprietor: a guided path with clear tracking.",
@@ -424,78 +462,56 @@ export default async function Page({ params }: { params: Promise<{ lang: string 
       <FadeIn className="mx-auto max-w-6xl px-4 py-20 md:py-24" id="offres">
         <h2 className="text-3xl font-semibold text-primary">{t.offersTitle}</h2>
 
-        <div className="mt-8 grid items-stretch gap-6 md:grid-cols-2">
-          <Card className="flex h-full flex-col p-7 shadow-soft-sm ring-1 ring-[rgba(31,143,95,0.22)] sm:p-8">
-            <div className="flex-1">
-              <p className="text-sm text-[rgba(43,43,43,0.72)]">
-                <span className="text-3xl font-bold text-primary sm:text-4xl">
-                  {t.srl.price.split("–")[0].trim()}
-                </span>{" "}
-                <span className="text-sm">– {t.srl.price.split("–").slice(1).join("–").trim()}</span>
-              </p>
-              <Badge className="mt-3 bg-white/60 text-primary">Franchise TVA</Badge>
-              <h3 className="mt-3 text-xl font-semibold text-primary">{t.srl.title}</h3>
+        <div className="mt-8 grid items-stretch gap-6 lg:grid-cols-2">
+          {t.packs.map((p) => (
+            <Card
+              key={p.id}
+              accent={!!p.recommended}
+              className={[
+                "flex h-full flex-col p-7 shadow-soft-sm sm:p-8",
+                p.recommended ? "ring-1 ring-[rgba(31,143,95,0.22)]" : "",
+              ].join(" ")}
+            >
+              <div className="flex-1">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-semibold text-[rgba(43,43,43,0.72)]">
+                      {p.title}
+                    </p>
+                    <p className="mt-2 text-3xl font-bold tracking-tight text-primary sm:text-4xl">
+                      {p.price}
+                    </p>
+                    <p className="mt-3 text-sm text-[rgba(43,43,43,0.72)]">{p.idealFor}</p>
+                  </div>
+                  {p.recommended ? <Badge tone="accent">Recommandé</Badge> : null}
+                </div>
 
-              <ul className="mt-5 grid gap-3 text-sm text-[rgba(43,43,43,0.74)]">
-                {t.srl.bullets.map((item, idx) => {
-                  const icons = [FileText, Landmark, PiggyBank, BadgeCheck] as const;
-                  const Icon = icons[idx] ?? CheckCircle2;
-                  return (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <Badge className="bg-white/60 text-primary">Franchise TVA</Badge>
+                </div>
+
+                <ul className="mt-6 grid gap-3 text-sm text-[rgba(43,43,43,0.74)]">
+                  {p.bullets.map((item) => (
                     <li key={item} className="flex items-start gap-2.5">
                       <span className="mt-0.5 inline-flex h-7 w-7 items-center justify-center rounded-xl bg-[rgba(31,143,95,0.12)] text-[var(--color-accent)]">
-                        <Icon className="h-4 w-4" strokeWidth={2.2} />
+                        <CheckCircle2 className="h-4 w-4" strokeWidth={2.2} />
                       </span>
                       <span>{item}</span>
                     </li>
-                  );
-                })}
-              </ul>
+                  ))}
+                </ul>
+              </div>
 
-              <p className="mt-5 text-xs italic text-[rgba(43,43,43,0.65)]">{t.srl.bottom}</p>
-            </div>
-
-            <div className="mt-7 inline-flex">
-              <ButtonLink href={`/${lang}/creer-entreprise?type=srl`} className="w-full sm:w-auto">
-                {t.srl.cta}
-              </ButtonLink>
-            </div>
-          </Card>
-
-          <Card className="flex h-full flex-col p-7 shadow-soft-sm sm:p-8">
-            <div className="flex-1">
-              <p className="text-sm text-[rgba(43,43,43,0.72)]">
-                <span className="text-3xl font-bold text-primary sm:text-4xl">
-                  {t.pp.price.split("–")[0].trim()}
-                </span>{" "}
-                <span className="text-sm">– {t.pp.price.split("–").slice(1).join("–").trim()}</span>
-              </p>
-              <Badge className="mt-3 bg-white/60 text-primary">Franchise TVA</Badge>
-              <h3 className="mt-3 text-xl font-semibold text-primary">{t.pp.title}</h3>
-
-              <ul className="mt-5 grid gap-3 text-sm text-[rgba(43,43,43,0.74)]">
-                {t.pp.bullets.map((item) => (
-                  <li key={item} className="flex items-start gap-2.5">
-                    <span className="mt-0.5 inline-flex h-7 w-7 items-center justify-center rounded-xl bg-[rgba(31,143,95,0.12)] text-[var(--color-accent)]">
-                      <CheckCircle2 className="h-4 w-4" strokeWidth={2.2} />
-                    </span>
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <p className="mt-5 text-xs italic text-[rgba(43,43,43,0.65)]">{t.pp.bottom}</p>
-            </div>
-
-            <div className="mt-7 inline-flex">
-              <ButtonLink
-                href={`/${lang}/creer-entreprise?type=pp`}
-                variant="outline"
-                className="w-full sm:w-auto"
-              >
-                {t.pp.cta}
-              </ButtonLink>
-            </div>
-          </Card>
+              <div className="mt-7 inline-flex">
+                <ButtonLink
+                  href={`/${lang}/creer-entreprise?pack=${encodeURIComponent(p.id)}`}
+                  className="w-full whitespace-nowrap sm:w-auto"
+                >
+                  {t.packsCta}
+                </ButtonLink>
+              </div>
+            </Card>
+          ))}
         </div>
       </FadeIn>
 

@@ -9,12 +9,17 @@ type TypeParam = "srl" | "pp";
 const isTypeParam = (value: unknown): value is TypeParam =>
   value === "srl" || value === "pp";
 
+type PackParam = "base" | "branding" | "domiciliation" | "partners";
+const isPackParam = (value: unknown): value is PackParam =>
+  value === "base" || value === "branding" || value === "domiciliation" || value === "partners";
+
 const content = {
   fr: {
     badge: "Créer une entreprise",
     h1: "On démarre ?",
     subtitle:
       "Choisissez votre formule. Remplissez le formulaire. Nous nous occupons du reste.",
+    chosenPack: "Pack choisi",
     selected: "Sélectionné",
     choose: "Choisir",
     start: "Commencer",
@@ -29,6 +34,7 @@ const content = {
     badge: "Start",
     h1: "Gaan we van start?",
     subtitle: "Kies uw formule. Vul het formulier in. Wij regelen de rest.",
+    chosenPack: "Gekozen pack",
     selected: "Geselecteerd",
     choose: "Kiezen",
     start: "Start",
@@ -43,6 +49,7 @@ const content = {
     badge: "Get started",
     h1: "Shall we start?",
     subtitle: "Choose your plan. Fill in the form. We handle the rest.",
+    chosenPack: "Selected pack",
     selected: "Selected",
     choose: "Choose",
     start: "Start",
@@ -60,14 +67,26 @@ export default async function Page({
   searchParams,
 }: {
   params: Promise<{ lang: string }>;
-  searchParams?: Promise<{ type?: string }>;
+  searchParams?: Promise<{ type?: string; pack?: string }>;
 }) {
   const { lang: rawLang } = await params;
   const lang = normalizeLang(rawLang);
   const sp = (await searchParams) || {};
   const selected = isTypeParam(sp.type) ? sp.type : undefined;
+  const pack = isPackParam(sp.pack) ? sp.pack : undefined;
   const chosen: TypeParam = selected ?? "srl";
   const t = content[lang] ?? content.fr;
+
+  const packLabel =
+    pack === "base"
+      ? "Base"
+      : pack === "branding"
+        ? "Charte"
+        : pack === "domiciliation"
+          ? "Domiciliation"
+          : pack === "partners"
+            ? "Partenaires"
+            : undefined;
 
   return (
     <main className="hero-bg">
@@ -76,6 +95,12 @@ export default async function Page({
           <Badge tone="accent">{t.badge}</Badge>
           <h1 className="text-4xl font-semibold">{t.h1}</h1>
           <p className="max-w-2xl text-[rgba(43,43,43,0.75)]">{t.subtitle}</p>
+          {packLabel ? (
+            <div className="flex items-center gap-2 text-sm text-[rgba(43,43,43,0.72)]">
+              <span className="font-semibold text-primary/80">{t.chosenPack}:</span>
+              <Badge className="bg-white/60 text-primary">{packLabel}</Badge>
+            </div>
+          ) : null}
         </FadeIn>
 
         <FadeIn className="mt-8 grid gap-6 md:grid-cols-2">
@@ -101,7 +126,10 @@ export default async function Page({
               )}
             </ul>
             <div className="mt-6 flex flex-wrap gap-3">
-              <ButtonLink href={`/${lang}/creer-entreprise?type=srl`} variant="outline">
+              <ButtonLink
+                href={`/${lang}/creer-entreprise?type=srl${pack ? `&pack=${pack}` : ""}`}
+                variant="outline"
+              >
                 {t.choose}
               </ButtonLink>
             </div>
@@ -128,7 +156,10 @@ export default async function Page({
               )}
             </ul>
             <div className="mt-6 flex flex-wrap gap-3">
-              <ButtonLink href={`/${lang}/creer-entreprise?type=pp`} variant="outline">
+              <ButtonLink
+                href={`/${lang}/creer-entreprise?type=pp${pack ? `&pack=${pack}` : ""}`}
+                variant="outline"
+              >
                 {t.choose}
               </ButtonLink>
             </div>
@@ -155,7 +186,7 @@ export default async function Page({
 
         <FadeIn className="mt-10 flex items-center justify-between gap-4">
           <ButtonLink
-            href={`/${lang}/onboarding/creation-entreprise?type=${chosen}`}
+            href={`/${lang}/onboarding/creation-entreprise?type=${chosen}${pack ? `&pack=${pack}` : ""}`}
             className="px-9 py-4 text-base shadow-soft"
           >
             {t.start}
