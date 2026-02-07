@@ -13,6 +13,15 @@ function isPublicClientRoute(pathname: string) {
   );
 }
 
+function safeNextForClientSpace(lang: string, rawNext: string) {
+  // Prevent redirects into admin from a client-space auth prompt.
+  // Only allow redirects within the client space for this locale.
+  if (!rawNext) return `/${lang}/espace-client`;
+  if (!rawNext.startsWith("/")) return `/${lang}/espace-client`;
+  const allowedPrefix = `/${lang}/espace-client`;
+  return rawNext.startsWith(allowedPrefix) ? rawNext : `/${lang}/espace-client`;
+}
+
 export default function Layout({ children }: { children: React.ReactNode }) {
   const params = useParams<{ lang: string }>();
   const lang = normalizeLang(params.lang);
@@ -34,7 +43,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
     const next =
       typeof window !== "undefined"
-        ? new URLSearchParams(window.location.search).get("next") || pathname
+        ? safeNextForClientSpace(
+            lang,
+            new URLSearchParams(window.location.search).get("next") || pathname
+          )
         : pathname;
     router.replace(`/${lang}/espace-client/login?next=${encodeURIComponent(next)}`);
   }, [authed, lang, mounted, pathname, router]);

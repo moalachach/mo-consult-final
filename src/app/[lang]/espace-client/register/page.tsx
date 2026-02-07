@@ -21,10 +21,19 @@ export default function Page() {
   const [password, setPassword] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
 
+  function safeNext(rawNext: string | null) {
+    // Prevent accidental redirects into admin when the user is registering from client space.
+    // Only allow redirects within the client space for this page.
+    if (!rawNext) return `/${lang}/espace-client`;
+    if (!rawNext.startsWith("/")) return `/${lang}/espace-client`;
+    const allowedPrefix = `/${lang}/espace-client`;
+    return rawNext.startsWith(allowedPrefix) ? rawNext : `/${lang}/espace-client`;
+  }
+
   React.useEffect(() => {
     if (typeof window === "undefined") return;
     const n = new URLSearchParams(window.location.search).get("next");
-    setNext(n || `/${lang}/espace-client`);
+    setNext(safeNext(n));
   }, [lang]);
 
   return (
