@@ -109,7 +109,7 @@ export function SiteFooter({ lang }: { lang: string }) {
     "text-sm text-[rgba(255,255,255,0.82)] transition hover:text-white";
 
   return (
-    <footer className="border-t border-sand bg-[var(--color-primary)] text-white">
+    <footer className="overflow-hidden border-t border-sand bg-[var(--color-primary)] text-white">
       <div className="relative">
         <div aria-hidden className="pointer-events-none absolute inset-0">
           <div className="absolute -left-28 -top-24 h-[360px] w-[360px] rounded-full bg-[rgba(31,143,95,0.18)] blur-3xl" />

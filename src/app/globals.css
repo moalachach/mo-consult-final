@@ -19,6 +19,12 @@ body {
     Arial, "Apple Color Emoji", "Segoe UI Emoji";
 }
 
+html,
+body {
+  /* Prevent horizontal scrollbars caused by decorative blobs or long content on mobile. */
+  overflow-x: hidden;
+}
+
 .hero-bg {
   background: radial-gradient(circle at 12% 8%, rgba(63, 91, 69, 0.14), transparent 55%),
     radial-gradient(circle at 88% 20%, rgba(31, 143, 95, 0.12), transparent 58%),
