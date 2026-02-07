@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import React from "react";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { normalizeLang } from "@/lib/i18n";
@@ -12,12 +12,11 @@ import { completeMockPayment } from "@/lib/mock-dossiers";
 export default function Page() {
   const params = useParams<{ lang: string }>();
   const lang = normalizeLang(params.lang);
-  const sp = useSearchParams();
 
-  const type = (sp.get("type") === "srl" ? "srl" : "pp") as "srl" | "pp";
+  const [type, setType] = React.useState<"srl" | "pp">("pp");
   const enableMollie = process.env.NEXT_PUBLIC_ENABLE_MOLLIE === "true";
   const enableResend = process.env.NEXT_PUBLIC_ENABLE_RESEND === "true";
-  const [paymentId, setPaymentId] = React.useState<string | null>(sp.get("paymentId"));
+  const [paymentId, setPaymentId] = React.useState<string | null>(null);
   const [sessionEmail, setSessionEmail] = React.useState<string | null>(null);
 
   const [state, setState] = React.useState<"checking" | "paid" | "not_paid" | "error">(
@@ -25,6 +24,13 @@ export default function Page() {
   );
   const [err, setErr] = React.useState<string | null>(null);
   const [notifyDone, setNotifyDone] = React.useState(false);
+
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    const sp = new URLSearchParams(window.location.search);
+    setType(sp.get("type") === "srl" ? "srl" : "pp");
+    setPaymentId(sp.get("paymentId"));
+  }, []);
 
   React.useEffect(() => {
     const run = async () => {

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import { getSession } from "@/lib/mock-auth";
 import { normalizeLang } from "@/lib/i18n";
 
@@ -17,7 +17,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const params = useParams<{ lang: string }>();
   const lang = normalizeLang(params.lang);
   const pathname = usePathname();
-  const sp = useSearchParams();
   const router = useRouter();
 
   const [mounted, setMounted] = React.useState(false);
@@ -33,9 +32,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     if (isPublicClientRoute(pathname)) return;
     if (authed) return;
 
-    const next = sp.get("next") || pathname;
+    const next =
+      typeof window !== "undefined"
+        ? new URLSearchParams(window.location.search).get("next") || pathname
+        : pathname;
     router.replace(`/${lang}/espace-client/login?next=${encodeURIComponent(next)}`);
-  }, [authed, lang, mounted, pathname, router, sp]);
+  }, [authed, lang, mounted, pathname, router]);
 
   if (!mounted) {
     return (
@@ -64,4 +66,3 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return <>{children}</>;
 }
-

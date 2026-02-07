@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { getSteps } from "./steps";
 import type { CreationType, Draft, StepId } from "./types";
@@ -207,11 +207,17 @@ function validateStep(stepId: StepId, draft: Draft): Record<string, string> {
 
 export default function Page() {
   const params = useParams<{ lang: string }>();
-  const sp = useSearchParams();
   const router = useRouter();
   const lang = params.lang || "fr";
-  const type = (sp.get("type") === "srl" ? "srl" : "pp") as CreationType;
+  const [type, setType] = React.useState<CreationType>("pp");
   const enableMollie = process.env.NEXT_PUBLIC_ENABLE_MOLLIE === "true";
+
+  // Read type from URL query (client-only) without useSearchParams() to keep static builds happy.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const raw = new URLSearchParams(window.location.search).get("type");
+    setType(raw === "srl" ? "srl" : "pp");
+  }, []);
 
   const steps = useMemo(() => getSteps(type), [type]);
 

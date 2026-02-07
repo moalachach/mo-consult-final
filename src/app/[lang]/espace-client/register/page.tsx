@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import React from "react";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { registerUser } from "@/lib/mock-auth";
 import { normalizeLang } from "@/lib/i18n";
@@ -10,15 +10,19 @@ import { normalizeLang } from "@/lib/i18n";
 export default function Page() {
   const params = useParams<{ lang: string }>();
   const lang = normalizeLang(params.lang);
-  const sp = useSearchParams();
   const router = useRouter();
+  const [next, setNext] = React.useState(`/${lang}/espace-client`);
 
   const [name, setName] = React.useState("");
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
 
-  const next = sp.get("next") || `/${lang}/espace-client`;
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    const n = new URLSearchParams(window.location.search).get("next");
+    setNext(n || `/${lang}/espace-client`);
+  }, [lang]);
 
   return (
     <div className="min-h-screen bg-[var(--color-beige)]">
@@ -108,4 +112,3 @@ export default function Page() {
     </div>
   );
 }
-

@@ -1,11 +1,5 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { Manrope } from "next/font/google";
-
-const manrope = Manrope({
-  subsets: ["latin"],
-  variable: "--font-sans",
-});
 
 export const metadata: Metadata = {
   title: "Mo Consult",
@@ -15,10 +9,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fr">
-      <body className={`${manrope.variable} min-h-screen text-dark antialiased`}>
-        {children}
-      </body>
+      <body className="min-h-screen text-dark antialiased">{children}</body>
     </html>
   );
 }
-
