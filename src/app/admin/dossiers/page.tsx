@@ -3,7 +3,11 @@
 import Link from "next/link";
 import React from "react";
 import { motion } from "framer-motion";
-import { listDossiers, setDraftWorkflowStatus } from "@/lib/mock-dossiers";
+import { isSupabaseConfigured } from "@/lib/env";
+import {
+  listDossiers as listDossiersMock,
+  setDraftWorkflowStatus as setDraftWorkflowStatusMock,
+} from "@/lib/mock-dossiers";
 import type { DossierStatus } from "@/lib/mock-dossiers";
 import { BadgeCheck, Clock3, Filter, XCircle } from "lucide-react";
 
@@ -43,8 +47,53 @@ function StatusBadge({ status }: { status: DossierStatus }) {
 
 export default function Page() {
   const [filter, setFilter] = React.useState<DossierStatus | "all">("all");
-  const all = listDossiers();
-  const dossiers = filter === "all" ? all : all.filter((d) => d.status === filter);
+  const [loading, setLoading] = React.useState(false);
+  const [dossiers, setDossiers] = React.useState<
+    Array<{ id: string; type: string; status: DossierStatus; updatedAt?: string; updated_at?: string | null }>
+  >([]);
+
+  React.useEffect(() => {
+    const run = async () => {
+      if (!isSupabaseConfigured()) {
+        const all = listDossiersMock();
+        setDossiers(filter === "all" ? all : all.filter((d) => d.status === filter));
+        return;
+      }
+      setLoading(true);
+      try {
+        const qs = filter === "all" ? "" : `?status=${encodeURIComponent(filter)}`;
+        const res = await fetch(`/api/admin/dossiers${qs}`, { cache: "no-store" });
+        const json = (await res.json()) as any;
+        if (json?.ok) setDossiers(json.dossiers || []);
+      } finally {
+        setLoading(false);
+      }
+    };
+    run();
+    if (!isSupabaseConfigured()) return;
+    // Auto-refresh so new client dossiers appear without manual reload.
+    const t = window.setInterval(run, 4000);
+    return () => window.clearInterval(t);
+  }, [filter]);
+
+  const setStatus = async (id: string, type: string, status: DossierStatus) => {
+    // Optimistic UX: update immediately without refresh.
+    setDossiers((all) => all.map((d) => (d.id === id ? { ...d, status } : d)));
+
+    if (!isSupabaseConfigured()) {
+      setDraftWorkflowStatusMock(type as any, status);
+      return;
+    }
+    try {
+      await fetch(`/api/admin/dossiers/${encodeURIComponent(id)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+    } catch {
+      // Best-effort: ignore network errors in UI.
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[var(--color-beige)]">
@@ -55,7 +104,9 @@ export default function Page() {
               Admin — Dossiers
             </h1>
             <p className="mt-2 text-[rgba(43,43,43,0.72)]">
-              UI-only: statuts + messages en localStorage.
+              {isSupabaseConfigured()
+                ? "Mode production (Supabase): dossiers en base de donnees."
+                : "UI-only: statuts + messages en localStorage."}
             </p>
           </div>
           <div className="inline-flex items-center gap-2 rounded-2xl border border-[var(--color-sand)] bg-white/60 px-4 py-3 text-sm text-[rgba(43,43,43,0.75)] backdrop-blur">
@@ -76,7 +127,11 @@ export default function Page() {
           </div>
         </div>
 
-        {dossiers.length === 0 ? (
+        {loading ? (
+          <div className="rounded-3xl border border-[var(--color-sand)] bg-white/70 p-8 text-center shadow-sm backdrop-blur">
+            <p className="text-sm font-semibold text-[var(--color-text)]">Chargement…</p>
+          </div>
+        ) : dossiers.length === 0 ? (
           <div className="rounded-3xl border border-[var(--color-sand)] bg-white/70 p-8 text-center shadow-sm backdrop-blur">
             <p className="text-sm font-semibold text-[var(--color-text)]">Aucun dossier</p>
             <p className="mt-2 text-sm text-[rgba(43,43,43,0.72)]">
@@ -101,7 +156,9 @@ export default function Page() {
                     </p>
                     <p className="mt-1 text-sm text-[rgba(43,43,43,0.70)]">
                       Mis à jour:{" "}
-                      {d.updatedAt ? new Date(d.updatedAt).toLocaleString() : "—"}
+                      {d.updatedAt || (d as any).updated_at
+                        ? new Date((d.updatedAt || (d as any).updated_at) as string).toLocaleString()
+                        : "—"}
                     </p>
                   </div>
 
@@ -112,21 +169,21 @@ export default function Page() {
                       <button
                         type="button"
                         className="rounded-2xl border border-[var(--color-sand)] bg-white/60 px-4 py-2 text-sm font-semibold text-[var(--color-primary)] transition hover:bg-[var(--color-beige)]"
-                        onClick={() => setDraftWorkflowStatus(d.type, "in_progress")}
+                        onClick={() => setStatus(d.id, d.type, "in_progress")}
                       >
                         En cours
                       </button>
                       <button
                         type="button"
                         className="rounded-2xl border border-[var(--color-sand)] bg-white/60 px-4 py-2 text-sm font-semibold text-[var(--color-primary)] transition hover:bg-[var(--color-beige)]"
-                        onClick={() => setDraftWorkflowStatus(d.type, "approved")}
+                        onClick={() => setStatus(d.id, d.type, "approved")}
                       >
                         Approuver
                       </button>
                       <button
                         type="button"
                         className="rounded-2xl border border-[var(--color-sand)] bg-white/60 px-4 py-2 text-sm font-semibold text-[var(--color-primary)] transition hover:bg-[var(--color-beige)]"
-                        onClick={() => setDraftWorkflowStatus(d.type, "cancelled")}
+                        onClick={() => setStatus(d.id, d.type, "cancelled")}
                       >
                         Annuler
                       </button>
@@ -148,4 +205,3 @@ export default function Page() {
     </div>
   );
 }
-

@@ -1,6 +1,9 @@
 -- Mo Consult (UI-first -> production-ready schema)
 -- Run this in Supabase SQL Editor.
 
+-- Required for gen_random_uuid()
+create extension if not exists pgcrypto;
+
 -- 1) Profiles (role + display name)
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
@@ -67,6 +70,20 @@ create table if not exists public.partners (
   updated_at timestamptz not null default now()
 );
 
+-- 6) Analytics events (simple pageviews)
+create table if not exists public.page_events (
+  id uuid primary key default gen_random_uuid(),
+  event text not null default 'pageview',
+  path text not null,
+  lang text,
+  referrer text,
+  user_agent text,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists page_events_created_idx on public.page_events(created_at);
+create index if not exists page_events_path_idx on public.page_events(path);
+
 -- ---------------------------
 -- RLS
 -- ---------------------------
@@ -75,6 +92,7 @@ alter table public.dossiers enable row level security;
 alter table public.messages enable row level security;
 alter table public.promo_codes enable row level security;
 alter table public.partners enable row level security;
+alter table public.page_events enable row level security;
 
 -- Profiles: user can read/update own profile. Admin can read all.
 create policy "profiles_select_own" on public.profiles
@@ -138,6 +156,10 @@ create policy "promo_codes_public_select" on public.promo_codes
 -- Partners: public read active partners.
 create policy "partners_public_select_active" on public.partners
   for select using (is_active = true);
+
+-- Analytics: public insert only (read via service role from server routes).
+create policy "page_events_public_insert" on public.page_events
+  for insert with check (true);
 
 -- NOTE:
 -- Admin policies (read all dossiers/messages, manage partners/promos) should be implemented

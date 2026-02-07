@@ -93,7 +93,7 @@ export default function Page() {
 
   return (
     <div className="min-h-screen bg-[var(--color-beige)]">
-      <div className="mx-auto max-w-5xl px-4 py-10">
+      <div className="mx-auto max-w-6xl px-4 py-10">
         <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h1 className="text-3xl font-semibold tracking-tight text-[var(--color-text)]">

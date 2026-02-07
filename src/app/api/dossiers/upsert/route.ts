@@ -45,9 +45,13 @@ export async function POST(req: Request) {
     .maybeSingle();
 
   if (error) {
-    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+    const msg = error.message || "UNKNOWN";
+    if (msg.includes("Could not find the table")) {
+      // Schema not installed yet in Supabase project.
+      return NextResponse.json({ ok: false, error: "SUPABASE_SCHEMA_MISSING" }, { status: 503 });
+    }
+    return NextResponse.json({ ok: false, error: msg }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true, dossier: data });
 }
-

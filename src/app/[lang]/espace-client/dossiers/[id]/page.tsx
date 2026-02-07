@@ -21,6 +21,8 @@ import {
 } from "@/lib/mock-dossiers";
 import type { CreationType, Draft } from "@/app/[lang]/onboarding/creation-entreprise/types";
 import { applyPromoToAmountEUR, findPromoCode, normalizePromoCode } from "@/lib/mock-promos";
+import { isSupabaseConfigured } from "@/lib/env";
+import { normalizeLang } from "@/lib/i18n";
 
 function typeFromId(id: string): CreationType | null {
   if (id === dossierId("srl")) return "srl";
@@ -28,9 +30,8 @@ function typeFromId(id: string): CreationType | null {
   return null;
 }
 
-function Timeline({ id, draft }: { id: string; draft: Draft }) {
+function Timeline({ draft }: { draft: Draft }) {
   const status = (draft.workflow?.status as any) ?? "new";
-  void id;
 
   const stagePill = (st: "pending" | "incomplete" | "done") => {
     const map: Record<string, string> = {
@@ -121,15 +122,38 @@ function Timeline({ id, draft }: { id: string; draft: Draft }) {
 
 function SrlStages({
   id,
+  dossierUuid,
   draft,
   setDraft,
 }: {
   id: string;
+  dossierUuid: string | null;
   draft: Draft;
   setDraft: (d: Draft) => void;
 }) {
   const srl = draft.workflow?.srl;
   if (!srl) return null;
+
+  const persistClientDraft = (next: Draft, messageText?: string) => {
+    setDraft(next);
+    if (isSupabaseConfigured() && dossierUuid) {
+      void fetch(`/api/dossiers/${encodeURIComponent(dossierUuid)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ draft: next }),
+      });
+      if (messageText) {
+        void fetch(`/api/dossiers/${encodeURIComponent(dossierUuid)}/messages`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ body: messageText }),
+        });
+      }
+      return;
+    }
+    persistDossier("srl", next);
+    if (messageText) addMessage(id, { sender: "client", text: messageText });
+  };
 
   const [open, setOpen] = React.useState<Record<string, boolean>>({
     dossier: true,
@@ -194,9 +218,7 @@ function SrlStages({
         },
       },
     };
-    setDraft(next);
-    persistDossier("srl", next);
-    addMessage(id, { sender: "client", text: `J’ai ajouté l’attestation bancaire: ${file.name}` });
+    persistClientDraft(next, `J’ai ajouté l’attestation bancaire: ${file.name}`);
   };
 
   const onToggleAlternative = (v: boolean) => {
@@ -214,8 +236,7 @@ function SrlStages({
         },
       },
     };
-    setDraft(next);
-    persistDossier("srl", next);
+    persistClientDraft(next);
   };
 
   const onToggleDomiciliation = (v: boolean) => {
@@ -233,8 +254,7 @@ function SrlStages({
         },
       },
     };
-    setDraft(next);
-    persistDossier("srl", next);
+    persistClientDraft(next);
   };
 
   const onUploadBail = (file: File | null) => {
@@ -249,9 +269,7 @@ function SrlStages({
         },
       },
     };
-    setDraft(next);
-    persistDossier("srl", next);
-    addMessage(id, { sender: "client", text: `J’ai ajouté le bail: ${file.name}` });
+    persistClientDraft(next, `J’ai ajouté le bail: ${file.name}`);
   };
 
   const onChooseAccountant = (mode: "proposed" | "already", value: string) => {
@@ -265,15 +283,12 @@ function SrlStages({
         },
       },
     };
-    setDraft(next);
-    persistDossier("srl", next);
-    addMessage(id, {
-      sender: "client",
-      text:
-        mode === "proposed"
-          ? `J’ai choisi un comptable proposé: ${value}`
-          : `J’ai déjà un comptable: ${value}`,
-    });
+    persistClientDraft(
+      next,
+      mode === "proposed"
+        ? `J’ai choisi un comptable proposé: ${value}`
+        : `J’ai déjà un comptable: ${value}`
+    );
   };
 
   const onConfirmRdv = (date: string) => {
@@ -284,8 +299,7 @@ function SrlStages({
         srl: { ...srl, rendezVous: { ...srl.rendezVous, confirmedDate: date } },
       },
     };
-    setDraft(next);
-    persistDossier("srl", next);
+    persistClientDraft(next);
   };
 
   const onConfirmPaidNotaire = (v: boolean) => {
@@ -299,8 +313,7 @@ function SrlStages({
         },
       },
     };
-    setDraft(next);
-    persistDossier("srl", next);
+    persistClientDraft(next);
   };
 
   const onConfirmRdvFinal = (v: boolean) => {
@@ -314,8 +327,7 @@ function SrlStages({
         },
       },
     };
-    setDraft(next);
-    persistDossier("srl", next);
+    persistClientDraft(next);
   };
 
   const onHasStableOffice = (v: boolean) => {
@@ -326,8 +338,7 @@ function SrlStages({
         srl: { ...srl, tva: { ...srl.tva, hasStableOffice: v } },
       },
     };
-    setDraft(next);
-    persistDossier("srl", next);
+    persistClientDraft(next);
   };
 
   const onConfirmAffiliationPaid = (v: boolean) => {
@@ -338,8 +349,7 @@ function SrlStages({
         srl: { ...srl, affiliation: { ...srl.affiliation, clientConfirmedPaid: v } },
       },
     };
-    setDraft(next);
-    persistDossier("srl", next);
+    persistClientDraft(next);
   };
 
   return (
@@ -1031,10 +1041,44 @@ function DocsBlock({ draft }: { draft: Draft }) {
   );
 }
 
-function Messages({ id }: { id: string }) {
+function Messages({ id, dossierUuid }: { id: string; dossierUuid: string | null }) {
   const [text, setText] = React.useState("");
   const [tick, setTick] = React.useState(0);
-  const msgs = React.useMemo(() => loadMessages(id), [id, tick]);
+  const [dbMsgs, setDbMsgs] = React.useState<Array<any>>([]);
+
+  const msgs = React.useMemo(() => {
+    if (!isSupabaseConfigured() || !dossierUuid) return loadMessages(id);
+    return dbMsgs.map((m) => ({
+      id: m.id,
+      sender: m.sender,
+      text: m.body,
+      createdAt: m.created_at,
+    }));
+  }, [dbMsgs, dossierUuid, id]);
+
+  React.useEffect(() => {
+    if (!isSupabaseConfigured() || !dossierUuid) return;
+
+    let stop = false;
+    const fetchMsgs = async () => {
+      try {
+        const res = await fetch(`/api/dossiers/${encodeURIComponent(dossierUuid)}/messages`, {
+          cache: "no-store",
+        });
+        const json = (await res.json()) as any;
+        if (!stop && json?.ok) setDbMsgs(json.messages || []);
+      } catch {
+        // ignore
+      }
+    };
+
+    void fetchMsgs();
+    const t = window.setInterval(fetchMsgs, 4000);
+    return () => {
+      stop = true;
+      window.clearInterval(t);
+    };
+  }, [dossierUuid, tick]);
 
   return (
     <div className="rounded-3xl border border-[var(--color-sand)] bg-white/70 p-6 shadow-sm backdrop-blur">
@@ -1084,7 +1128,18 @@ function Messages({ id }: { id: string }) {
           className="inline-flex items-center justify-center rounded-2xl bg-[var(--color-primary)] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:opacity-95 disabled:opacity-50"
           disabled={!text.trim()}
           onClick={() => {
-            addMessage(id, { sender: "client", text: text.trim() });
+            const body = text.trim();
+            if (!body) return;
+            if (isSupabaseConfigured() && dossierUuid) {
+              void fetch(`/api/dossiers/${encodeURIComponent(dossierUuid)}/messages`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ body }),
+              }).finally(() => setTick((t) => t + 1));
+              setText("");
+              return;
+            }
+            addMessage(id, { sender: "client", text: body });
             setText("");
             setTick((t) => t + 1);
           }}
@@ -1098,17 +1153,85 @@ function Messages({ id }: { id: string }) {
 
 export default function Page() {
   const params = useParams<{ lang: string; id: string }>();
-  const lang = params.lang || "fr";
+  const lang = normalizeLang(params.lang);
   const id = params.id;
 
   const type = typeFromId(id);
   const [mounted, setMounted] = React.useState(false);
   const [draft, setDraft] = React.useState<Draft | null>(null);
+  const [dossierUuid, setDossierUuid] = React.useState<string | null>(null);
+  const [loadingDb, setLoadingDb] = React.useState(false);
 
   React.useEffect(() => {
     setMounted(true);
     setDraft(type ? loadDossier(type) : null);
   }, [type, id]);
+
+  // Supabase mode: resolve dossier UUID and keep the draft updated automatically (no manual refresh).
+  React.useEffect(() => {
+    if (!isSupabaseConfigured()) return;
+    if (!type) return;
+
+    let alive = true;
+    const run = async () => {
+      setLoadingDb(true);
+      try {
+        const res = await fetch("/api/dossiers/list", { cache: "no-store" });
+        const json = (await res.json()) as any;
+        const found = (json?.dossiers || []).find((d: any) => d.type === type) as any;
+        if (!found?.id) {
+          await fetch("/api/dossiers/upsert", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ type, stepIndex: 0, draft: { type } }),
+          });
+          const res2 = await fetch("/api/dossiers/list", { cache: "no-store" });
+          const json2 = (await res2.json()) as any;
+          const found2 = (json2?.dossiers || []).find((d: any) => d.type === type) as any;
+          if (alive) setDossierUuid(found2?.id ?? null);
+        } else {
+          if (alive) setDossierUuid(found.id);
+        }
+      } catch {
+        if (alive) setDossierUuid(null);
+      } finally {
+        if (alive) setLoadingDb(false);
+      }
+    };
+    run();
+    return () => {
+      alive = false;
+    };
+  }, [type]);
+
+  React.useEffect(() => {
+    if (!isSupabaseConfigured()) return;
+    if (!dossierUuid) return;
+
+    let stop = false;
+    const fetchDraft = async () => {
+      try {
+        const res = await fetch(`/api/dossiers/${encodeURIComponent(dossierUuid)}`, {
+          cache: "no-store",
+        });
+        const json = (await res.json()) as any;
+        if (!stop && json?.ok && json.dossier?.draft) {
+          const next = json.dossier.draft as Draft;
+          if (!next.type && type) (next as any).type = type;
+          setDraft(next);
+        }
+      } catch {
+        // ignore
+      }
+    };
+
+    void fetchDraft();
+    const t = window.setInterval(fetchDraft, 4000);
+    return () => {
+      stop = true;
+      window.clearInterval(t);
+    };
+  }, [dossierUuid, type]);
 
   if (!mounted) {
     return (
@@ -1158,7 +1281,7 @@ export default function Page() {
 
   return (
     <div className="min-h-screen bg-[var(--color-beige)]">
-      <div className="mx-auto max-w-5xl px-4 py-10">
+      <div className="mx-auto max-w-6xl px-4 py-10">
         <div className="mb-8 flex items-center justify-between gap-4">
           <Link
             href={`/${lang}/espace-client`}
@@ -1223,14 +1346,16 @@ export default function Page() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35 }}
           >
-            <Timeline id={id} draft={draft} />
+            <Timeline draft={draft} />
           </motion.div>
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, delay: 0.03 }}
           >
-            {type === "srl" ? <SrlStages id={id} draft={draft} setDraft={setDraft} /> : null}
+            {type === "srl" ? (
+              <SrlStages id={id} dossierUuid={dossierUuid} draft={draft} setDraft={setDraft} />
+            ) : null}
           </motion.div>
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -1244,9 +1369,15 @@ export default function Page() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, delay: 0.06 }}
           >
-            <Messages id={id} />
+            <Messages id={id} dossierUuid={dossierUuid} />
           </motion.div>
         </div>
+
+        {isSupabaseConfigured() ? (
+          <p className="mt-6 text-center text-xs text-[rgba(43,43,43,0.60)]">
+            Mise à jour automatique activée {loadingDb ? "(chargement…)" : "(~4s)"}.
+          </p>
+        ) : null}
       </div>
     </div>
   );

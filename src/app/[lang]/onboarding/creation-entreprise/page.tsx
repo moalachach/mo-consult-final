@@ -21,6 +21,10 @@ import { getSession, registerUser } from "@/lib/mock-auth";
 import { completeMockPayment } from "@/lib/mock-dossiers";
 import { useRouter } from "next/navigation";
 import { applyPromoToAmountEUR, findPromoCode, normalizePromoCode } from "@/lib/mock-promos";
+import { isSupabaseConfigured } from "@/lib/env";
+import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { importLocalDraftsToSupabase } from "@/lib/import-local-drafts";
+import { normalizeLang } from "@/lib/i18n";
 
 function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
@@ -208,7 +212,7 @@ function validateStep(stepId: StepId, draft: Draft): Record<string, string> {
 export default function Page() {
   const params = useParams<{ lang: string }>();
   const router = useRouter();
-  const lang = params.lang || "fr";
+  const lang = normalizeLang(params.lang);
   const [type, setType] = React.useState<CreationType>("pp");
   const enableMollie = process.env.NEXT_PUBLIC_ENABLE_MOLLIE === "true";
 
@@ -230,7 +234,13 @@ export default function Page() {
   const [resumeDraft, setResumeDraft] = useState<Draft | null>(null);
   const [resumeIndex, setResumeIndex] = useState<number>(0);
   const [saveEnabled, setSaveEnabled] = useState(true);
-  const [session, setSession] = useState(() => getSession());
+  const [session, setSession] = useState(() => getSession()); // mock session (UI-only)
+  const [identity, setIdentity] = useState<{ name: string; email: string } | null>(null); // supabase or mock
+
+  // If Supabase is configured but the schema isn't installed yet, repeated failing requests can slow the browser.
+  // We disable sync after the first detected failure to keep UX smooth.
+  const supabaseSyncDisabledRef = useRef(false);
+  const [supabaseSyncWarning, setSupabaseSyncWarning] = useState<string | null>(null);
 
   const [accountForm, setAccountForm] = useState({ name: "", email: "", password: "" });
   const [accountErrors, setAccountErrors] = useState<Record<string, string>>({});
@@ -244,6 +254,27 @@ export default function Page() {
   // Load draft + progress, then show resume banner if exists.
   useEffect(() => {
     setSession(getSession());
+    // Read Supabase identity if configured.
+    if (isSupabaseConfigured()) {
+      (async () => {
+        try {
+          const supabase = getSupabaseBrowserClient();
+          const { data } = await supabase.auth.getUser();
+          const u = data.user;
+          if (u?.email) {
+            const name = (u.user_metadata?.name as string | undefined) || "Client";
+            setIdentity({ name, email: u.email });
+          } else {
+            setIdentity(null);
+          }
+        } catch {
+          setIdentity(null);
+        }
+      })();
+    } else {
+      const s = getSession();
+      setIdentity(s ? { name: s.name, email: s.email } : null);
+    }
     const existing = loadDraft(type);
     const progress = clamp(loadProgress(type), 0, steps.length - 1);
     if (existing) {
@@ -284,11 +315,37 @@ export default function Page() {
       meta: { ...draft.meta, updatedAt: new Date().toISOString() },
     };
     if (saveTimer.current) window.clearTimeout(saveTimer.current);
-    saveTimer.current = window.setTimeout(() => saveDraft(type, next), 400);
+    saveTimer.current = window.setTimeout(() => {
+      saveDraft(type, next);
+      // When Supabase is configured and the user is authenticated,
+      // persist drafts to DB so admin can see them immediately (no manual refresh).
+      if (isSupabaseConfigured() && identity?.email && !supabaseSyncDisabledRef.current) {
+        void (async () => {
+          try {
+            const res = await fetch("/api/dossiers/upsert", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ type, stepIndex, draft: next }),
+            });
+            if (!res.ok) {
+              supabaseSyncDisabledRef.current = true;
+              setSupabaseSyncWarning(
+                "Synchronisation temporairement désactivée (base non prête). Exécutez schema.sql dans Supabase, puis rechargez."
+              );
+            }
+          } catch {
+            supabaseSyncDisabledRef.current = true;
+            setSupabaseSyncWarning(
+              "Synchronisation temporairement désactivée (erreur réseau). Rechargez après configuration Supabase."
+            );
+          }
+        })();
+      }
+    }, 400);
     return () => {
       if (saveTimer.current) window.clearTimeout(saveTimer.current);
     };
-  }, [type, draft, saveEnabled]);
+  }, [type, draft, saveEnabled, identity, stepIndex]);
 
   const step = steps[stepIndex]!;
 
@@ -304,13 +361,39 @@ export default function Page() {
     setTouched(true);
     if (step.id === "account") {
       const e: Record<string, string> = {};
-      const s = getSession();
-      if (!s) {
+      if (!identity) {
         if (!accountForm.name.trim()) e.name = "Nom obligatoire";
         if (!accountForm.email.trim() || !accountForm.email.includes("@")) e.email = "Email invalide";
         if (!accountForm.password || accountForm.password.length < 6) e.password = "Mot de passe (min 6 caractères)";
         setAccountErrors(e);
         if (Object.keys(e).length > 0) return;
+        if (isSupabaseConfigured()) {
+          (async () => {
+            try {
+              const supabase = getSupabaseBrowserClient();
+              const { error } = await supabase.auth.signUp({
+                email: accountForm.email,
+                password: accountForm.password,
+                options: { data: { name: accountForm.name } },
+              });
+              if (error) {
+                setAccountErrors({ email: error.message });
+                return;
+              }
+              // Import any local wizard drafts into DB (guest -> authed).
+              await importLocalDraftsToSupabase();
+              setIdentity({ name: accountForm.name, email: accountForm.email });
+              setSession(getSession());
+              setTouched(false);
+              setErrors({});
+              setStepIndex((i) => clamp(i + 1, 0, steps.length - 1));
+            } catch (err: any) {
+              setAccountErrors({ email: err?.message || "Erreur" });
+            }
+          })();
+          return;
+        }
+
         const res = registerUser({
           name: accountForm.name,
           email: accountForm.email,
@@ -320,7 +403,9 @@ export default function Page() {
           setAccountErrors({ email: res.error || "Erreur" });
           return;
         }
-        setSession(getSession());
+        const s = getSession();
+        setSession(s);
+        setIdentity(s ? { name: s.name, email: s.email } : null);
       }
       setTouched(false);
       setErrors({});
@@ -406,25 +491,27 @@ export default function Page() {
           </p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
-          <Button
-            onClick={() => {
-              if (resumeDraft) {
-                setDraft(resumeDraft);
-                setStepIndex(clamp(resumeIndex, 0, steps.length - 1));
-                const code = resumeDraft.meta.promoCode ? normalizePromoCode(resumeDraft.meta.promoCode) : "";
-                if (code) {
-                  setPromoApplied(code);
-                  setPromoInput(code);
-                }
-              }
-              setShowResumePrompt(false);
-              setResumeDraft(null);
-              setSaveEnabled(true);
-            }}
-            className="whitespace-nowrap"
-          >
-            Reprendre
-          </Button>
+              <Button
+                onClick={() => {
+                  if (resumeDraft) {
+                    setDraft(resumeDraft);
+                    setStepIndex(clamp(resumeIndex, 0, steps.length - 1));
+                    const code = resumeDraft.meta.promoCode ? normalizePromoCode(resumeDraft.meta.promoCode) : "";
+                    if (code) {
+                      setPromoApplied(code);
+                      setPromoInput(code);
+                    }
+                  }
+                  setShowResumePrompt(false);
+                  setResumeDraft(null);
+                  setSaveEnabled(true);
+                  // If the user is already authenticated (Supabase), import existing local draft now.
+                  if (isSupabaseConfigured()) void importLocalDraftsToSupabase();
+                }}
+                className="whitespace-nowrap"
+              >
+                Reprendre
+              </Button>
           <Button variant="outline" onClick={onRestart} className="whitespace-nowrap">
             Recommencer
           </Button>
@@ -440,11 +527,23 @@ export default function Page() {
   const promo = promoApplied ? findPromoCode(promoApplied) : null;
   const pricing = promo ? applyPromoToAmountEUR(basePriceEUR, promo) : null;
 
+  const combinedBanner =
+    supabaseSyncWarning || banner ? (
+      <div className="grid gap-3">
+        {supabaseSyncWarning ? (
+          <div className="rounded-2xl border border-[var(--color-sand)] bg-white/70 px-4 py-3 text-sm text-[var(--color-text)] shadow-sm backdrop-blur">
+            {supabaseSyncWarning}
+          </div>
+        ) : null}
+        {banner}
+      </div>
+    ) : null;
+
   return (
     <WizardLayout
       title={title}
       subtitle={subtitle}
-      banner={banner || undefined}
+      banner={combinedBanner || undefined}
       stepper={<Stepper steps={steps} stepIndex={stepIndex} onSelect={onSelect} />}
       footer={
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -460,7 +559,12 @@ export default function Page() {
             ) : (
               <Button
                 onClick={() => {
-                  const s = getSession();
+                  const s =
+                    identity?.email
+                      ? { name: identity.name, email: identity.email }
+                      : getSession()
+                        ? { name: getSession()!.name, email: getSession()!.email }
+                        : null;
                   if (!s) {
                     alert("Veuillez vous inscrire / vous connecter avant le paiement.");
                     return;
@@ -476,7 +580,9 @@ export default function Page() {
                     // Keep the applied code in the draft for client/admin UI (backend-ready later).
                     setDraft((d) => ({ ...d, meta: { ...d.meta, promoCode: promoApplied } }));
                   }
-                  completeMockPayment(type, s);
+                  // UI-only mock payment: store messages + status in localStorage.
+                  // (Supabase mode will be plugged later with Mollie webhooks.)
+                  completeMockPayment(type, { name: s.name, email: s.email } as any);
                   router.push(`/${lang}/espace-client/dossiers/creation-${type}`);
                 }}
               >

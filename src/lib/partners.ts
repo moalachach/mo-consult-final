@@ -1,3 +1,6 @@
+import { isSupabaseConfigured } from "@/lib/env";
+import { getSupabaseServerClient } from "@/lib/supabase/server";
+
 export type PartnerCategory =
   | "notaire"
   | "comptable"
@@ -20,7 +23,7 @@ export type Partner = {
   logoText?: string;
 };
 
-export const partners: Partner[] = [
+export const fallbackPartners: Partner[] = [
   {
     slug: "indekeu-cleenewerck-decrayencour",
     category: "notaire",
@@ -82,7 +85,63 @@ export const partners: Partner[] = [
   },
 ];
 
-export function getPartnerBySlug(slug: string) {
-  return partners.find((p) => p.slug === slug) ?? null;
+export function getPartnerBySlugFallback(slug: string) {
+  return fallbackPartners.find((p) => p.slug === slug) ?? null;
 }
 
+export async function listPartnersServer() {
+  if (!isSupabaseConfigured()) return fallbackPartners;
+  try {
+    const supabase = await getSupabaseServerClient();
+    const { data, error } = await supabase
+      .from("partners")
+      .select("slug,category,name,website,city,address,phone,email,vat,description")
+      .eq("is_active", true)
+      .order("category", { ascending: true })
+      .order("name", { ascending: true });
+    if (error) return fallbackPartners;
+    return (data ?? []).map((p: any) => ({
+      slug: p.slug,
+      category: p.category,
+      name: p.name,
+      website: p.website ?? undefined,
+      city: p.city ?? undefined,
+      address: p.address ?? undefined,
+      phone: p.phone ?? undefined,
+      email: p.email ?? undefined,
+      vat: p.vat ?? undefined,
+      description: p.description ?? undefined,
+      logoText: (p.name || "").split(/\s+/).slice(0, 2).map((x: string) => x[0]).join("").toUpperCase(),
+    }));
+  } catch {
+    return fallbackPartners;
+  }
+}
+
+export async function getPartnerBySlugServer(slug: string) {
+  if (!isSupabaseConfigured()) return getPartnerBySlugFallback(slug);
+  try {
+    const supabase = await getSupabaseServerClient();
+    const { data, error } = await supabase
+      .from("partners")
+      .select("slug,category,name,website,city,address,phone,email,vat,description,is_active")
+      .eq("slug", slug)
+      .maybeSingle();
+    if (error || !data || data.is_active === false) return getPartnerBySlugFallback(slug);
+    return {
+      slug: data.slug,
+      category: data.category,
+      name: data.name,
+      website: data.website ?? undefined,
+      city: data.city ?? undefined,
+      address: data.address ?? undefined,
+      phone: data.phone ?? undefined,
+      email: data.email ?? undefined,
+      vat: data.vat ?? undefined,
+      description: data.description ?? undefined,
+      logoText: (data.name || "").split(/\s+/).slice(0, 2).map((x: string) => x[0]).join("").toUpperCase(),
+    } as Partner;
+  } catch {
+    return getPartnerBySlugFallback(slug);
+  }
+}

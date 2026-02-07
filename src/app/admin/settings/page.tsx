@@ -4,8 +4,9 @@ import React from "react";
 import Link from "next/link";
 import { Button, Card, Badge } from "@/components/ui";
 import { FadeIn } from "@/components/fade-in";
-import { LOGO_STORAGE_KEY } from "@/components/dynamic-logo";
+import { LOGO_STORAGE_KEYS, type LogoSlot } from "@/components/dynamic-logo";
 import { ImageUp, Trash2 } from "lucide-react";
+import { isSupabaseConfigured } from "@/lib/env";
 import {
   deletePromoCode,
   listPromoCodes,
@@ -16,8 +17,19 @@ import {
 
 const MAX_SIZE_BYTES = 2_000_000; // keep localStorage safe-ish
 
+function logoLabel(slot: LogoSlot) {
+  return slot === "header" ? "Logo Header" : "Logo Footer";
+}
+
+function logoHelp(slot: LogoSlot) {
+  return slot === "header"
+    ? "Ce logo s’affiche dans le header (petit format)."
+    : "Ce logo s’affiche dans le footer (format plus large possible).";
+}
+
 export default function Page() {
-  const [dataUrl, setDataUrl] = React.useState<string | null>(null);
+  const [headerUrl, setHeaderUrl] = React.useState<string | null>(null);
+  const [footerUrl, setFooterUrl] = React.useState<string | null>(null);
   const [error, setError] = React.useState<string | null>(null);
   const [promoError, setPromoError] = React.useState<string | null>(null);
   const [promos, setPromos] = React.useState(() => listPromoCodes());
@@ -31,14 +43,34 @@ export default function Page() {
 
   React.useEffect(() => {
     try {
-      setDataUrl(window.localStorage.getItem(LOGO_STORAGE_KEY));
+      setHeaderUrl(window.localStorage.getItem(LOGO_STORAGE_KEYS.header));
+      setFooterUrl(window.localStorage.getItem(LOGO_STORAGE_KEYS.footer));
     } catch {
-      setDataUrl(null);
+      setHeaderUrl(null);
+      setFooterUrl(null);
     }
     setPromos(listPromoCodes());
   }, []);
 
-  const onFile = async (file: File | null) => {
+  const refreshPromos = React.useCallback(async () => {
+    if (!isSupabaseConfigured()) {
+      setPromos(listPromoCodes());
+      return;
+    }
+    try {
+      const res = await fetch("/api/admin/promo-codes", { cache: "no-store" });
+      const json = (await res.json()) as any;
+      if (json?.ok) setPromos(json.promoCodes || []);
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  React.useEffect(() => {
+    void refreshPromos();
+  }, [refreshPromos]);
+
+  const onFile = async (slot: LogoSlot, file: File | null) => {
     setError(null);
     if (!file) return;
     if (!file.type.startsWith("image/")) {
@@ -55,9 +87,12 @@ export default function Page() {
       const next = typeof reader.result === "string" ? reader.result : null;
       if (!next) return;
       try {
-        window.localStorage.setItem(LOGO_STORAGE_KEY, next);
-        setDataUrl(next);
+        window.localStorage.setItem(LOGO_STORAGE_KEYS[slot], next);
+        if (slot === "header") setHeaderUrl(next);
+        else setFooterUrl(next);
+        // Global + slot-specific events (header/footer update live).
         window.dispatchEvent(new Event("moconsult:logo"));
+        window.dispatchEvent(new Event(`moconsult:logo:${slot}`));
       } catch {
         setError("Impossible de sauvegarder le logo (stockage plein ?).");
       }
@@ -65,16 +100,78 @@ export default function Page() {
     reader.readAsDataURL(file);
   };
 
-  const clear = () => {
+  const clear = (slot: LogoSlot) => {
     setError(null);
     try {
-      window.localStorage.removeItem(LOGO_STORAGE_KEY);
-      setDataUrl(null);
+      window.localStorage.removeItem(LOGO_STORAGE_KEYS[slot]);
+      if (slot === "header") setHeaderUrl(null);
+      else setFooterUrl(null);
       window.dispatchEvent(new Event("moconsult:logo"));
+      window.dispatchEvent(new Event(`moconsult:logo:${slot}`));
     } catch {
       setError("Impossible de supprimer le logo.");
     }
   };
+
+  const LogoCard = ({
+    slot,
+    value,
+  }: {
+    slot: LogoSlot;
+    value: string | null;
+  }) => (
+    <Card>
+      <h2 className="text-xl font-semibold">{logoLabel(slot)}</h2>
+      <p className="mt-2 text-sm text-[rgba(43,43,43,0.7)]">{logoHelp(slot)}</p>
+
+      <div className="mt-6 flex flex-wrap items-center gap-3">
+        <label className="inline-flex cursor-pointer items-center gap-2 rounded-2xl border border-sand bg-white/70 px-5 py-3 text-sm font-semibold text-primary hover:bg-[var(--color-sand)]/50">
+          <ImageUp className="h-4 w-4" strokeWidth={2.2} />
+          Choisir une image
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => onFile(slot, e.target.files?.[0] ?? null)}
+          />
+        </label>
+
+        <Button
+          variant="outline"
+          onClick={() => clear(slot)}
+          disabled={!value}
+          className="gap-2"
+        >
+          <Trash2 className="h-4 w-4" strokeWidth={2.2} />
+          Supprimer
+        </Button>
+      </div>
+
+      <div className="mt-5 rounded-3xl border border-sand bg-white/60 p-5">
+        <p className="text-sm font-semibold text-primary">Aperçu</p>
+        <div className="mt-3 rounded-3xl border border-sand bg-white/70 p-4 shadow-soft-sm">
+          {value ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={value}
+              alt={`Logo preview (${slot})`}
+              className={[
+                "mx-auto block object-contain",
+                slot === "footer" ? "h-16 w-auto max-w-[260px]" : "h-12 w-auto max-w-[110px]",
+              ].join(" ")}
+            />
+          ) : (
+            <div className="mx-auto flex h-16 w-full items-center justify-center text-sm font-bold text-primary">
+              MC
+            </div>
+          )}
+        </div>
+        <p className="mt-3 text-xs text-[rgba(43,43,43,0.65)]">
+          Stocké dans votre navigateur (localStorage). TODO plus tard: Supabase Storage.
+        </p>
+      </div>
+    </Card>
+  );
 
   return (
     <main className="home-bg">
@@ -91,70 +188,24 @@ export default function Page() {
           </Link>
         </FadeIn>
 
-        <FadeIn className="mt-10 grid gap-6 md:grid-cols-[1.2fr,1fr]">
-          <Card>
-            <h2 className="text-xl font-semibold">Logo</h2>
-            <p className="mt-2 text-sm text-[rgba(43,43,43,0.7)]">
-              Téléverse une image. Le header se met à jour automatiquement.
-            </p>
-
-            <div className="mt-6">
-              <label className="inline-flex cursor-pointer items-center gap-2 rounded-2xl border border-sand bg-white/70 px-5 py-3 text-sm font-semibold text-primary hover:bg-[var(--color-sand)]/50">
-                <ImageUp className="h-4 w-4" strokeWidth={2.2} />
-                Choisir une image
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => onFile(e.target.files?.[0] ?? null)}
-                />
-              </label>
-            </div>
-
-            {error && (
-              <p className="mt-3 text-sm font-medium text-[rgba(166,48,48,0.9)]">{error}</p>
-            )}
-
-            <div className="mt-6 flex flex-wrap items-center gap-3">
-              <Button
-                variant="outline"
-                onClick={clear}
-                disabled={!dataUrl}
-                className="gap-2"
-              >
-                <Trash2 className="h-4 w-4" strokeWidth={2.2} />
-                Supprimer
-              </Button>
-              <span className="text-xs text-[rgba(43,43,43,0.6)]">
-                Stocké dans votre navigateur (localStorage).
-              </span>
-            </div>
-          </Card>
-
-          <Card accent className="flex flex-col items-center justify-center">
-            <p className="text-sm font-semibold text-primary">Aperçu</p>
-            <div className="mt-4 h-24 w-24 rounded-3xl border border-sand bg-white/70 shadow-soft-sm">
-              {dataUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={dataUrl} alt="Logo preview" className="h-full w-full object-contain p-3" />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center text-sm font-bold text-primary">
-                  MC
-                </div>
-              )}
-            </div>
-            <p className="mt-4 text-xs text-[rgba(43,43,43,0.65)]">
-              Le logo s’affiche dans le header.
-            </p>
-          </Card>
+        <FadeIn className="mt-10 grid gap-6 md:grid-cols-2">
+          <LogoCard slot="header" value={headerUrl} />
+          <LogoCard slot="footer" value={footerUrl} />
         </FadeIn>
+
+        {error && (
+          <FadeIn className="mt-6">
+            <p className="text-sm font-medium text-[rgba(166,48,48,0.9)]">{error}</p>
+          </FadeIn>
+        )}
 
         <FadeIn className="mt-10">
           <Card>
             <h2 className="text-xl font-semibold">Codes promo</h2>
             <p className="mt-2 text-sm text-[rgba(43,43,43,0.7)]">
-              UI-only: ces codes sont stockés dans votre navigateur (localStorage). Ils sont
-              utilisables dans le wizard à l’étape finale (Récap).
+              {isSupabaseConfigured()
+                ? "Mode production (Supabase): les codes promo sont stockés en base de donnees."
+                : "UI-only: ces codes sont stockés dans votre navigateur (localStorage)."}
             </p>
 
             <div className="mt-6 grid gap-4 md:grid-cols-2">
@@ -241,20 +292,41 @@ export default function Page() {
               <Button
                 onClick={() => {
                   setPromoError(null);
-                  try {
-                    upsertPromoCode({
-                      code: promoForm.code,
-                      type: promoForm.type,
-                      value: promoForm.value,
-                      active: promoForm.active,
-                      note: promoForm.note || undefined,
-                    });
-                    setPromos(listPromoCodes());
-                    setPromoForm((f) => ({ ...f, code: "" }));
-                  } catch (e: unknown) {
-                    const msg = e instanceof Error ? e.message : null;
-                    setPromoError(msg || "Impossible d’enregistrer le code promo.");
-                  }
+                  (async () => {
+                    try {
+                      if (!isSupabaseConfigured()) {
+                        upsertPromoCode({
+                          code: promoForm.code,
+                          type: promoForm.type,
+                          value: promoForm.value,
+                          active: promoForm.active,
+                          note: promoForm.note || undefined,
+                        });
+                        setPromos(listPromoCodes());
+                        setPromoForm((f) => ({ ...f, code: "" }));
+                        return;
+                      }
+
+                      const res = await fetch("/api/admin/promo-codes", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          code: promoForm.code,
+                          type: promoForm.type,
+                          value: promoForm.value,
+                          active: promoForm.active,
+                          note: promoForm.note,
+                        }),
+                      });
+                      const json = (await res.json()) as any;
+                      if (!json?.ok) throw new Error(json?.error || "Erreur");
+                      setPromoForm((f) => ({ ...f, code: "" }));
+                      await refreshPromos();
+                    } catch (e: unknown) {
+                      const msg = e instanceof Error ? e.message : null;
+                      setPromoError(msg || "Impossible d’enregistrer le code promo.");
+                    }
+                  })();
                 }}
               >
                 Enregistrer
@@ -315,8 +387,21 @@ export default function Page() {
                           variant="outline"
                           onClick={() => {
                             setPromoError(null);
-                            deletePromoCode(p.code);
-                            setPromos(listPromoCodes());
+                            (async () => {
+                              try {
+                                if (!isSupabaseConfigured()) {
+                                  deletePromoCode(p.code);
+                                  setPromos(listPromoCodes());
+                                  return;
+                                }
+                                await fetch(`/api/admin/promo-codes/${encodeURIComponent(p.code)}`, {
+                                  method: "DELETE",
+                                });
+                                await refreshPromos();
+                              } catch {
+                                // ignore
+                              }
+                            })();
                           }}
                         >
                           Supprimer

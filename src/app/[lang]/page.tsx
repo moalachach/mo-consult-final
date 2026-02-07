@@ -3,6 +3,7 @@ import { normalizeLang } from "@/lib/i18n";
 import { Badge, Card } from "@/components/ui";
 import { FadeIn } from "@/components/fade-in";
 import { ButtonLink } from "@/components/button-link";
+import { listPartnersServer } from "@/lib/partners";
 import {
   BadgeCheck,
   Building2,
@@ -82,6 +83,7 @@ const content = {
     partnersTitle: "Nos partenaires",
     partners: [
       {
+        key: "notaire",
         title: "Notaires",
         icon: Landmark,
         items: [
@@ -92,6 +94,7 @@ const content = {
         ],
       },
       {
+        key: "comptable",
         title: "Comptables",
         icon: BadgeCheck,
         items: [
@@ -101,6 +104,7 @@ const content = {
         ],
       },
       {
+        key: "domiciliation",
         title: "Domiciliation",
         icon: Building2,
         items: [
@@ -111,6 +115,7 @@ const content = {
         ],
       },
       {
+        key: "caisse_sociale",
         title: "Caisses sociales",
         icon: ShieldCheck,
         items: [
@@ -119,6 +124,7 @@ const content = {
         ],
       },
       {
+        key: "design",
         title: "Design",
         icon: Sparkles,
         items: [{ name: "JUDesign", slug: "judesign" }],
@@ -188,6 +194,7 @@ const content = {
     partnersTitle: "Partners",
     partners: [
       {
+        key: "notaire",
         title: "Notarissen",
         icon: Landmark,
         items: [
@@ -198,6 +205,7 @@ const content = {
         ],
       },
       {
+        key: "comptable",
         title: "Accountants",
         icon: BadgeCheck,
         items: [
@@ -207,6 +215,7 @@ const content = {
         ],
       },
       {
+        key: "domiciliation",
         title: "Domicilie",
         icon: Building2,
         items: [
@@ -217,6 +226,7 @@ const content = {
         ],
       },
       {
+        key: "caisse_sociale",
         title: "Sociale fondsen",
         icon: ShieldCheck,
         items: [
@@ -225,6 +235,7 @@ const content = {
         ],
       },
       {
+        key: "design",
         title: "Design",
         icon: Sparkles,
         items: [{ name: "JUDesign", slug: "judesign" }],
@@ -298,6 +309,7 @@ const content = {
     partnersTitle: "Partners",
     partners: [
       {
+        key: "notaire",
         title: "Notaries",
         icon: Landmark,
         items: [
@@ -308,6 +320,7 @@ const content = {
         ],
       },
       {
+        key: "comptable",
         title: "Accountants",
         icon: BadgeCheck,
         items: [
@@ -317,6 +330,7 @@ const content = {
         ],
       },
       {
+        key: "domiciliation",
         title: "Domiciliation",
         icon: Building2,
         items: [
@@ -327,6 +341,7 @@ const content = {
         ],
       },
       {
+        key: "caisse_sociale",
         title: "Social funds",
         icon: ShieldCheck,
         items: [
@@ -335,6 +350,7 @@ const content = {
         ],
       },
       {
+        key: "design",
         title: "Design",
         icon: Sparkles,
         items: [{ name: "JUDesign", slug: "judesign" }],
@@ -352,6 +368,7 @@ export default async function Page({ params }: { params: Promise<{ lang: string 
   const { lang: rawLang } = await params;
   const lang = normalizeLang(rawLang);
   const t = content[lang] ?? content.fr;
+  const partnersAll = await listPartnersServer();
 
   return (
     <main className="home-bg">
@@ -542,13 +559,20 @@ export default async function Page({ params }: { params: Promise<{ lang: string 
           <Badge>Réseau</Badge>
         </div>
 
-        <div className="mt-8 grid items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {t.partners.map((p) => {
-            const Icon = p.icon;
-            return (
-              <Card
-                key={p.title}
-                className="flex h-full flex-col overflow-hidden p-7 shadow-soft-sm"
+	        <div className="mt-8 grid items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3">
+	          {t.partners.map((p) => {
+	            const Icon = p.icon;
+	            const key = (p as any).key as string;
+	            const dbItems = partnersAll.filter((x) => x.category === key);
+	            const items = (dbItems.length > 0 ? dbItems : (p as any).items) as Array<{
+	              slug: string;
+	              name: string;
+	              logoText?: string;
+	            }>;
+	            return (
+	              <Card
+	                key={p.title}
+	                className="flex h-full flex-col overflow-hidden p-7 shadow-soft-sm"
               >
                 <div className="flex items-start gap-4">
                   <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-[rgba(31,143,95,0.12)] text-[var(--color-accent)]">
@@ -560,37 +584,46 @@ export default async function Page({ params }: { params: Promise<{ lang: string 
                       Partenaires (liens + logos bientôt).
                     </p>
 
-                    <div className="mt-5 grid flex-1 gap-3">
-                      {p.items.map((it) => (
-                        <Link
-                          key={it.name}
-                          href={`/${lang}/partenaires/${it.slug}`}
-                          className="flex max-w-full items-start justify-between gap-3 rounded-2xl border border-sand bg-white/60 px-4 py-3 transition hover:bg-white/80"
-                        >
-                          <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-semibold text-primary" title={it.name}>
-                              {it.name}
-                            </p>
-                            <p className="mt-1 text-xs leading-5 text-[rgba(43,43,43,0.60)]">
-                              Voir la fiche partenaire
-                            </p>
-                          </div>
-                          <span
-                            aria-hidden
-                            className="mt-0.5 inline-flex h-10 w-10 flex-none items-center justify-center rounded-2xl border border-sand bg-white/80 text-xs font-semibold text-primary"
-                            title="Logo (placeholder)"
-                          >
-                            {(it.name.trim()[0] || "•").toUpperCase()}
-                          </span>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            );
-          })}
-        </div>
+	                    <div className="mt-5 grid flex-1 gap-3">
+	                      {items.length === 0 ? (
+	                        <div className="rounded-2xl border border-sand bg-white/60 px-4 py-3 text-sm text-[rgba(43,43,43,0.70)]">
+	                          Aucun partenaire pour l’instant.
+	                        </div>
+	                      ) : (
+	                        items.map((it) => (
+	                          <Link
+	                            key={it.slug}
+	                            href={`/${lang}/partenaires/${it.slug}`}
+	                            className="flex max-w-full items-start justify-between gap-3 rounded-2xl border border-sand bg-white/60 px-4 py-3 transition hover:bg-white/80"
+	                          >
+	                            <div className="min-w-0 flex-1">
+	                              <p
+	                                className="truncate text-sm font-semibold text-primary"
+	                                title={it.name}
+	                              >
+	                                {it.name}
+	                              </p>
+	                              <p className="mt-1 text-xs leading-5 text-[rgba(43,43,43,0.60)]">
+	                                Voir la fiche partenaire
+	                              </p>
+	                            </div>
+	                            <span
+	                              aria-hidden
+	                              className="mt-0.5 inline-flex h-10 w-10 flex-none items-center justify-center rounded-2xl border border-sand bg-white/80 text-xs font-semibold text-primary"
+	                              title="Logo (placeholder)"
+	                            >
+	                              {it.logoText || (it.name.trim()[0] || "•").toUpperCase()}
+	                            </span>
+	                          </Link>
+	                        ))
+	                      )}
+	                    </div>
+	                  </div>
+	                </div>
+	              </Card>
+	            );
+	          })}
+	        </div>
       </FadeIn>
 
       {/* CONTACT */}

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { normalizeLang } from "@/lib/i18n";
-import { getPartnerBySlug } from "@/lib/partners";
+import { getPartnerBySlugServer } from "@/lib/partners";
 import { Badge, Card } from "@/components/ui";
 import { ArrowUpRight, Building2, Mail, MapPin, Phone } from "lucide-react";
 
@@ -43,7 +43,7 @@ export default async function Page({
   const lang = normalizeLang(rawLang);
   const t = content[lang] ?? content.fr;
 
-  const partner = getPartnerBySlug(slug);
+  const partner = await getPartnerBySlugServer(slug);
   if (!partner) {
     return (
       <div className="min-h-screen bg-[var(--color-beige)]">
@@ -162,4 +162,3 @@ export default async function Page({
     </main>
   );
 }
-

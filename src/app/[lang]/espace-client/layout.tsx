@@ -42,7 +42,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   if (!mounted) {
     return (
       <div className="min-h-screen bg-[var(--color-beige)]">
-        <div className="mx-auto max-w-5xl px-4 py-10">
+        <div className="mx-auto max-w-6xl px-4 py-10">
           <div className="rounded-3xl border border-[var(--color-sand)] bg-white/70 p-8 backdrop-blur">
             <p className="text-sm font-semibold text-[var(--color-text)]">Chargement…</p>
           </div>
@@ -55,7 +55,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   if (!authed && !isPublicClientRoute(pathname)) {
     return (
       <div className="min-h-screen bg-[var(--color-beige)]">
-        <div className="mx-auto max-w-5xl px-4 py-10">
+        <div className="mx-auto max-w-6xl px-4 py-10">
           <div className="rounded-3xl border border-[var(--color-sand)] bg-white/70 p-8 backdrop-blur">
             <p className="text-sm font-semibold text-[var(--color-text)]">Redirection…</p>
           </div>

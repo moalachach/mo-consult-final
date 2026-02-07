@@ -8,6 +8,7 @@ import { registerUser } from "@/lib/mock-auth";
 import { normalizeLang } from "@/lib/i18n";
 import { isSupabaseConfigured } from "@/lib/env";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { importLocalDraftsToSupabase } from "@/lib/import-local-drafts";
 
 export default function Page() {
   const params = useParams<{ lang: string }>();
@@ -99,6 +100,8 @@ export default function Page() {
                       setError(error.message);
                       return;
                     }
+                    // If the user filled the wizard as a guest, import drafts now so admin can see them.
+                    await importLocalDraftsToSupabase();
                     router.replace(next);
                     return;
                   } catch (e: unknown) {

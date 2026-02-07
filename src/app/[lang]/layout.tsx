@@ -1,6 +1,7 @@
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { supportedLangs, normalizeLang } from "@/lib/i18n";
+import { AnalyticsTracker } from "@/components/analytics-tracker";
 
 export default async function LangLayout({
   children,
@@ -15,6 +16,7 @@ export default async function LangLayout({
   return (
     <>
       <SiteHeader lang={lang} />
+      <AnalyticsTracker />
       {children}
       <SiteFooter lang={lang} />
     </>

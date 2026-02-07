@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import React from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui";
 import { getT, normalizeLang } from "@/lib/i18n";
 import { DynamicLogo } from "@/components/dynamic-logo";
@@ -12,6 +12,7 @@ import { Menu, UserRound, X } from "lucide-react";
 export function SiteHeader({ lang }: { lang: string }) {
   const safeLang = normalizeLang(lang);
   const t = getT(safeLang);
+  const router = useRouter();
   const pathname = usePathname() || `/${safeLang}`;
   const [open, setOpen] = React.useState(false);
 
@@ -23,46 +24,93 @@ export function SiteHeader({ lang }: { lang: string }) {
   const isHome = pathname === `/${safeLang}`;
 
   const navLink =
-    "relative text-[rgba(26,26,26,0.72)] transition hover:text-[var(--color-primary)]";
+    "px-3 py-2 rounded-xl text-[15px] font-medium tracking-[0.02em] text-[var(--color-text)]/80 hover:text-[var(--color-text)] hover:bg-white/40 transition";
+
+  const goToSection = (id: string) => {
+    const targetPath = `/${safeLang}/#${id}`;
+    // Smooth-scroll if already on home; otherwise navigate then scroll.
+    if (typeof window !== "undefined" && pathname === `/${safeLang}`) {
+      const el = document.getElementById(id);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+    }
+    router.push(targetPath);
+    if (typeof window !== "undefined") {
+      window.setTimeout(() => {
+        document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 80);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-40 border-b border-sand bg-[var(--color-beige)]/92 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center gap-6 px-4 py-3">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
         {/* Left: logo (dynamic) */}
-        <div className="flex flex-1 items-center">
+        <div className="flex items-center pl-1">
           <Link
             href={`/${safeLang}`}
             className="inline-flex items-center"
             aria-label="Mo Consult - Accueil"
           >
-            <DynamicLogo />
+            <DynamicLogo slot="header" />
           </Link>
         </div>
 
         {/* Center: nav */}
-        <nav className="hidden flex-1 items-center justify-center gap-9 text-sm font-medium md:flex">
-          <Link href={`/${safeLang}`} className={[navLink, isHome && "text-primary"].join(" ")}>
-            {t.nav.home}
-            {isHome && (
-              <span className="absolute -bottom-2 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-[var(--color-accent)]" />
-            )}
-          </Link>
-          <Link href={`/${safeLang}/#offres`} className={navLink}>
-            {t.nav.offers}
-          </Link>
-          <Link href={`/${safeLang}/#comment-ca-marche`} className={navLink}>
-            {t.nav.process}
-          </Link>
-          <Link href={`/${safeLang}/#partenaires`} className={navLink}>
-            {t.nav.partners}
-          </Link>
-          <Link href={`/${safeLang}/#contact`} className={navLink}>
-            {t.nav.contact}
-          </Link>
+        <nav className="hidden lg:flex flex-1 justify-center">
+          <div className="flex items-center gap-2 rounded-2xl bg-white/25 px-2 py-1 backdrop-blur">
+            <Link
+              href={`/${safeLang}`}
+              className={[
+                "relative",
+                navLink,
+                isHome && "text-[var(--color-text)] bg-white/40",
+              ].join(" ")}
+            >
+              {t.nav.home}
+              {isHome && (
+                <span className="absolute -bottom-1 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-[var(--color-accent)]" />
+              )}
+            </Link>
+            <button
+              type="button"
+              className={navLink}
+              onClick={() => goToSection("offres")}
+              aria-label={t.nav.offers}
+            >
+              {t.nav.offers}
+            </button>
+            <button
+              type="button"
+              className={navLink}
+              onClick={() => goToSection("comment-ca-marche")}
+              aria-label={t.nav.process}
+            >
+              {t.nav.process}
+            </button>
+            <button
+              type="button"
+              className={navLink}
+              onClick={() => goToSection("partenaires")}
+              aria-label={t.nav.partners}
+            >
+              {t.nav.partners}
+            </button>
+            <button
+              type="button"
+              className={navLink}
+              onClick={() => goToSection("contact")}
+              aria-label={t.nav.contact}
+            >
+              {t.nav.contact}
+            </button>
+          </div>
         </nav>
 
         {/* Right: language + CTA */}
-        <div className="flex flex-1 items-center justify-end gap-3">
+        <div className="flex items-center justify-end gap-3">
           {/* Next.js requires a Suspense boundary for components using useSearchParams(). */}
           <React.Suspense
             fallback={
@@ -114,35 +162,39 @@ export function SiteHeader({ lang }: { lang: string }) {
       {open && (
         <div className="md:hidden">
           <div className="border-t border-sand bg-[var(--color-beige)]/92 backdrop-blur">
-            <div className="mx-auto max-w-7xl px-4 py-4">
+            <div className="mx-auto max-w-6xl px-4 py-4">
               <div className="flex flex-col gap-2 text-sm font-semibold">
                 <Link href={`/${safeLang}`} className="rounded-2xl px-3 py-2 text-primary hover:bg-white/60">
                   {t.nav.home}
                 </Link>
-                <Link
-                  href={`/${safeLang}/#offres`}
-                  className="rounded-2xl px-3 py-2 text-primary hover:bg-white/60"
+                <button
+                  type="button"
+                  className="rounded-2xl px-3 py-2 text-left text-primary hover:bg-white/60"
+                  onClick={() => goToSection("offres")}
                 >
                   {t.nav.offers}
-                </Link>
-                <Link
-                  href={`/${safeLang}/#comment-ca-marche`}
-                  className="rounded-2xl px-3 py-2 text-primary hover:bg-white/60"
+                </button>
+                <button
+                  type="button"
+                  className="rounded-2xl px-3 py-2 text-left text-primary hover:bg-white/60"
+                  onClick={() => goToSection("comment-ca-marche")}
                 >
                   {t.nav.process}
-                </Link>
-                <Link
-                  href={`/${safeLang}/#partenaires`}
-                  className="rounded-2xl px-3 py-2 text-primary hover:bg-white/60"
+                </button>
+                <button
+                  type="button"
+                  className="rounded-2xl px-3 py-2 text-left text-primary hover:bg-white/60"
+                  onClick={() => goToSection("partenaires")}
                 >
                   {t.nav.partners}
-                </Link>
-                <Link
-                  href={`/${safeLang}/#contact`}
-                  className="rounded-2xl px-3 py-2 text-primary hover:bg-white/60"
+                </button>
+                <button
+                  type="button"
+                  className="rounded-2xl px-3 py-2 text-left text-primary hover:bg-white/60"
+                  onClick={() => goToSection("contact")}
                 >
                   {t.nav.contact}
-                </Link>
+                </button>
               </div>
 
               <div className="mt-4 flex items-center justify-between gap-3">

@@ -21,7 +21,11 @@ export async function GET() {
     .order("updated_at", { ascending: false });
 
   if (error) {
-    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+    const msg = error.message || "UNKNOWN";
+    if (msg.includes("Could not find the table")) {
+      return NextResponse.json({ ok: false, error: "SUPABASE_SCHEMA_MISSING" }, { status: 503 });
+    }
+    return NextResponse.json({ ok: false, error: msg }, { status: 500 });
   }
 
   // minimal validation to keep response stable
@@ -38,4 +42,3 @@ export async function GET() {
   const parsed = z.array(Row).safeParse(data ?? []);
   return NextResponse.json({ ok: true, dossiers: parsed.success ? parsed.data : data ?? [] });
 }
-

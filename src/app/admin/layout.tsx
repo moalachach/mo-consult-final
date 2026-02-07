@@ -24,9 +24,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   try {
     await requireAdmin();
   } catch {
-    redirect(`/fr/espace-client/login?next=${encodeURIComponent("/admin")}`);
+    redirect(`/fr/admin/login?next=${encodeURIComponent("/admin/dashboard")}`);
   }
 
   return <>{children}</>;
 }
-

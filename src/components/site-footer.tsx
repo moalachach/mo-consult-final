@@ -148,7 +148,7 @@ export function SiteFooter({ lang }: { lang: string }) {
           <div className="mt-12 grid gap-10 md:grid-cols-2 lg:grid-cols-4">
             <div>
               <div className="flex items-center gap-3">
-                <DynamicLogo />
+                <DynamicLogo slot="footer" />
                 <div>
                   <p className="text-base font-semibold">Mo Consult</p>
                   <div className="mt-1 flex items-center gap-2">

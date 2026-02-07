@@ -6,20 +6,21 @@ import { motion } from "framer-motion";
 import React from "react";
 import { ArrowLeft, BadgeCheck, CircleDashed, Clock3, MessageCircle, XCircle } from "lucide-react";
 import {
-  addMessage,
-  dossierId,
-  loadDossier,
-  loadMessages,
-  loadStatusHistory,
-  setDraftWorkflowStatus,
-  persistDossier,
+  addMessage as addMessageMock,
+  dossierId as dossierIdMock,
+  loadDossier as loadDossierMock,
+  loadMessages as loadMessagesMock,
+  loadStatusHistory as loadStatusHistoryMock,
+  setDraftWorkflowStatus as setDraftWorkflowStatusMock,
+  persistDossier as persistDossierMock,
 } from "@/lib/mock-dossiers";
 import type { CreationType, Draft } from "@/app/[lang]/onboarding/creation-entreprise/types";
 import type { DossierStatus } from "@/lib/mock-dossiers";
+import { isSupabaseConfigured } from "@/lib/env";
 
 function typeFromId(id: string): CreationType | null {
-  if (id === dossierId("srl")) return "srl";
-  if (id === dossierId("pp")) return "pp";
+  if (id === dossierIdMock("srl")) return "srl";
+  if (id === dossierIdMock("pp")) return "pp";
   return null;
 }
 
@@ -63,7 +64,7 @@ function Timeline({
   onSetStatus: (s: DossierStatus) => void;
 }) {
   const status = ((draft.workflow?.status as any) ?? "new") as DossierStatus;
-  const history = loadStatusHistory(id);
+  const history = loadStatusHistoryMock(id);
   const [showHistory, setShowHistory] = React.useState(false);
 
   const steps: Array<{ key: string; label: string; icon: any }> = [
@@ -180,7 +181,33 @@ function Timeline({
 function Messages({ id }: { id: string }) {
   const [text, setText] = React.useState("");
   const [tick, setTick] = React.useState(0);
-  const msgs = React.useMemo(() => loadMessages(id), [id, tick]);
+  const [dbMsgs, setDbMsgs] = React.useState<Array<any>>([]);
+
+  const msgs = React.useMemo(() => {
+    if (!isSupabaseConfigured()) return loadMessagesMock(id);
+    return dbMsgs.map((m) => ({
+      id: m.id,
+      sender: m.sender,
+      text: m.body,
+      createdAt: m.created_at,
+    }));
+  }, [dbMsgs, id]);
+
+  React.useEffect(() => {
+    if (!isSupabaseConfigured()) return;
+    const run = async () => {
+      try {
+        const res = await fetch(`/api/admin/dossiers/${encodeURIComponent(id)}/messages`, {
+          cache: "no-store",
+        });
+        const json = (await res.json()) as any;
+        if (json?.ok) setDbMsgs(json.messages || []);
+      } catch {
+        // ignore
+      }
+    };
+    run();
+  }, [id, tick]);
 
   return (
     <div className="rounded-3xl border border-[var(--color-sand)] bg-white/70 p-6 shadow-sm backdrop-blur">
@@ -188,7 +215,9 @@ function Messages({ id }: { id: string }) {
         <div>
           <p className="text-sm font-semibold text-[var(--color-text)]">Messages</p>
           <p className="mt-1 text-sm text-[rgba(43,43,43,0.70)]">
-            Admin ↔ client (mock localStorage).
+            {isSupabaseConfigured()
+              ? "Admin ↔ client (Supabase)."
+              : "Admin ↔ client (mock localStorage)."}
           </p>
         </div>
         <MessageCircle className="h-5 w-5 text-[var(--color-accent)]" strokeWidth={2.2} />
@@ -230,9 +259,28 @@ function Messages({ id }: { id: string }) {
           className="inline-flex items-center justify-center rounded-2xl bg-[var(--color-primary)] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:opacity-95 disabled:opacity-50"
           disabled={!text.trim()}
           onClick={() => {
-            addMessage(id, { sender: "admin", text: text.trim() });
-            setText("");
-            setTick((t) => t + 1);
+            const v = text.trim();
+            if (!v) return;
+            if (!isSupabaseConfigured()) {
+              addMessageMock(id, { sender: "admin", text: v });
+              setText("");
+              setTick((t) => t + 1);
+              return;
+            }
+            (async () => {
+              try {
+                await fetch(`/api/admin/dossiers/${encodeURIComponent(id)}/messages`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ body: v }),
+                });
+              } catch {
+                // ignore
+              } finally {
+                setText("");
+                setTick((t) => t + 1);
+              }
+            })();
           }}
         >
           Envoyer
@@ -287,7 +335,6 @@ function AdminSrlStages({
       meta: { ...(draft.meta ?? {}), updatedAt: new Date().toISOString() },
     };
     setDraft(next);
-    persistDossier("srl", next);
   };
 
   const notifyClient = async (subject: string, text: string) => {
@@ -307,6 +354,23 @@ function AdminSrlStages({
       alert("Email envoyé au client.");
     } catch (e: any) {
       alert(e?.message || "Impossible d’envoyer l’email");
+    }
+  };
+
+  const pushAdminMessage = async (text: string) => {
+    if (!text.trim()) return;
+    if (!isSupabaseConfigured()) {
+      addMessageMock(id, { sender: "admin", text });
+      return;
+    }
+    try {
+      await fetch(`/api/admin/dossiers/${encodeURIComponent(id)}/messages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ body: text }),
+      });
+    } catch {
+      // ignore
     }
   };
 
@@ -470,10 +534,9 @@ function AdminSrlStages({
                             notifiedClient: true,
                           },
                         });
-                        addMessage(id, {
-                          sender: "admin",
-                          text: `Votre plan financier est disponible sur la plateforme (${f.name}).`,
-                        });
+                        void pushAdminMessage(
+                          `Votre plan financier est disponible sur la plateforme (${f.name}).`
+                        );
                         notifyClient(
                           "Plan financier disponible",
                           `Votre plan financier est disponible sur la plateforme (${f.name}).`
@@ -723,7 +786,7 @@ function AdminSrlStages({
                           ...srl,
                           notaire: { ...srl.notaire, dossierFileName: f.name, status: "done" },
                         });
-                        addMessage(id, { sender: "admin", text: "Dossier envoyé au notaire." });
+                        void pushAdminMessage("Dossier envoyé au notaire.");
                         notifyClient("Dossier envoyé au notaire", "Votre dossier a été transmis au notaire.");
                         e.currentTarget.value = "";
                       }}
@@ -828,7 +891,7 @@ function AdminSrlStages({
                           ...srl,
                           factureNotaire: { ...srl.factureNotaire, invoiceFileName: f.name },
                         });
-                        addMessage(id, { sender: "admin", text: `Facture notaire disponible (${f.name}).` });
+                        void pushAdminMessage(`Facture notaire disponible (${f.name}).`);
                         notifyClient(
                           "Facture notaire disponible",
                           `Vous avez reçu la facture du notaire (${f.name}). Merci de la payer avant le rendez-vous et de confirmer dans votre espace client.`
@@ -966,7 +1029,7 @@ function AdminSrlStages({
                           ...srl,
                           tva: { ...srl.tva, attestation604AFileName: f.name, status: "done" },
                         });
-                        addMessage(id, { sender: "admin", text: `Attestation 604A disponible (${f.name}).` });
+                        void pushAdminMessage(`Attestation 604A disponible (${f.name}).`);
                         notifyClient(
                           "Attestation 604A disponible",
                           `Votre attestation 604A est disponible sur la plateforme (${f.name}).`
@@ -1130,14 +1193,45 @@ function AdminSrlStages({
 export default function Page() {
   const params = useParams<{ id: string }>();
   const id = params.id;
-  const type = typeFromId(id);
+  const mockType = typeFromId(id);
   const [mounted, setMounted] = React.useState(false);
   const [draft, setDraft] = React.useState<Draft | null>(null);
+  const [type, setType] = React.useState<CreationType | null>(mockType);
+  const [loading, setLoading] = React.useState(false);
 
   React.useEffect(() => {
     setMounted(true);
-    setDraft(type ? loadDossier(type) : null);
-  }, [type, id]);
+    if (!isSupabaseConfigured()) {
+      setType(mockType);
+      setDraft(mockType ? loadDossierMock(mockType) : null);
+      return;
+    }
+
+    setLoading(true);
+    (async () => {
+      try {
+        const res = await fetch(`/api/admin/dossiers/${encodeURIComponent(id)}`, {
+          cache: "no-store",
+        });
+        const json = (await res.json()) as any;
+        if (!json?.ok || !json?.dossier) {
+          setType(null);
+          setDraft(null);
+          return;
+        }
+        const t = (json.dossier.type as CreationType) || null;
+        setType(t);
+        const next = (json.dossier.draft ?? {}) as any;
+        if (t && !next.type) next.type = t;
+        setDraft(next as Draft);
+      } catch {
+        setType(null);
+        setDraft(null);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [id, mockType]);
 
   if (!mounted) {
     return (
@@ -1163,14 +1257,34 @@ export default function Page() {
             Retour
           </Link>
           <div className="mt-6 rounded-3xl border border-[var(--color-sand)] bg-white/70 p-8 backdrop-blur">
-            <p className="text-sm font-semibold text-[var(--color-text)]">Dossier introuvable</p>
+            <p className="text-sm font-semibold text-[var(--color-text)]">
+              {loading ? "Chargement…" : "Dossier introuvable"}
+            </p>
           </div>
         </div>
       </div>
     );
   }
 
-  const current = (draft.workflow?.status as any) ?? "new";
+  const persist = async (next: Draft) => {
+    setDraft(next);
+    if (!isSupabaseConfigured()) {
+      persistDossierMock(type, next);
+      return;
+    }
+    try {
+      await fetch(`/api/admin/dossiers/${encodeURIComponent(id)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: (next.workflow?.status as any) ?? undefined,
+          draft: next,
+        }),
+      });
+    } catch {
+      // ignore
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[var(--color-beige)]">
@@ -1197,13 +1311,25 @@ export default function Page() {
               id={id}
               draft={draft}
               onSetStatus={(s) => {
-                setDraftWorkflowStatus(type, s);
-                setDraft(loadDossier(type));
+                const next: Draft = {
+                  ...draft,
+                  workflow: { ...(draft.workflow ?? {}), status: s },
+                };
+                void persist(next);
+                if (!isSupabaseConfigured()) {
+                  // Keep mock history in sync.
+                  setDraftWorkflowStatusMock(type, s);
+                  setDraft(loadDossierMock(type));
+                }
               }}
             />
           </motion.div>
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: 0.03 }}>
-            {type === "srl" ? <AdminSrlStages id={id} draft={draft} setDraft={setDraft} /> : <DocsBlock draft={draft} />}
+            {type === "srl" ? (
+              <AdminSrlStages id={id} draft={draft} setDraft={(d) => void persist(d)} />
+            ) : (
+              <DocsBlock draft={draft} />
+            )}
           </motion.div>
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: 0.06 }}>
             <Messages id={id} />
