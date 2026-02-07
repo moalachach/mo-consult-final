@@ -5,7 +5,7 @@ import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 const Body = z.object({
   type: z.enum(["srl", "pp"]),
-  status: z.string().min(1).optional(),
+  status: z.enum(["new", "in_progress", "approved", "cancelled"]).optional(),
   stepIndex: z.number().int().min(0).optional(),
   draft: z.unknown(),
 });
@@ -32,7 +32,7 @@ export async function POST(req: Request) {
   const row = {
     user_id: userData.user.id,
     type,
-    status: status ?? "draft",
+    status: status ?? "new",
     step_index: stepIndex ?? 0,
     draft,
     updated_at: new Date().toISOString(),

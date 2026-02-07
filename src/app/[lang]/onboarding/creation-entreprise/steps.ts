@@ -6,6 +6,10 @@ const STEPS: StepConfig[] = [
     label: "Formule",
   },
   {
+    id: "account",
+    label: "Compte",
+  },
+  {
     id: "identite",
     label: "Identité",
     requiredPaths: ["identite.prenom", "identite.nom", "identite.email", "identite.tel"],
@@ -34,10 +38,6 @@ const STEPS: StepConfig[] = [
   {
     id: "docs",
     label: "Documents",
-  },
-  {
-    id: "account",
-    label: "Compte",
   },
   {
     id: "recap",

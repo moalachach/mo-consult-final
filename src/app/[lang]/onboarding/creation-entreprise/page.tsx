@@ -325,7 +325,12 @@ export default function Page() {
             const res = await fetch("/api/dossiers/upsert", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ type, stepIndex, draft: next }),
+              body: JSON.stringify({
+                type,
+                stepIndex,
+                status: (next.workflow?.status as any) ?? "new",
+                draft: next,
+              }),
             });
             if (!res.ok) {
               supabaseSyncDisabledRef.current = true;

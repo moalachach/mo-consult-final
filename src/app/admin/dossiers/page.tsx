@@ -30,7 +30,7 @@ function StatusBadge({ status }: { status: DossierStatus }) {
       cls: "border-[rgba(239,68,68,0.22)] bg-[rgba(239,68,68,0.10)] text-[rgb(153,27,27)]",
     },
   };
-  const m = map[status];
+  const m = map[status] ?? map.new;
   const Icon = m.icon;
   return (
     <span

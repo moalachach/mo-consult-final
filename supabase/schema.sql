@@ -20,7 +20,7 @@ create table if not exists public.dossiers (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   type text not null check (type in ('srl','pp')),
-  status text not null default 'draft',
+  status text not null default 'new',
   step_index int not null default 0,
   draft jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now(),
