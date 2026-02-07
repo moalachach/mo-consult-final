@@ -12,6 +12,52 @@ npm run dev -- --port 3001
 Open:
 - `http://localhost:3001/fr`
 
+## Supabase (Auth + Database) — required for launch
+
+This project can run UI-only without Supabase, but for a real launch you should connect:
+- Supabase Auth (email/password)
+- Postgres tables (dossiers, messages, promo codes, partners)
+- RLS policies
+
+### 1) Create a Supabase project
+
+In Supabase dashboard:
+- Create a project
+- Copy:
+  - Project URL
+  - Anon public key
+  - Service role key (server-only)
+
+### 2) Run the SQL schema
+
+Open Supabase **SQL Editor** and run:
+- `supabase/schema.sql`
+
+### 3) Configure env vars
+
+Create `.env.local` (do not commit it):
+
+```bash
+NEXT_PUBLIC_APP_URL=http://localhost:3001
+
+NEXT_PUBLIC_SUPABASE_URL=<SUPABASE_PROJECT_URL>
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<SUPABASE_ANON_KEY>
+SUPABASE_SERVICE_ROLE_KEY=<SUPABASE_SERVICE_ROLE_KEY>
+
+NEXT_PUBLIC_ENABLE_MOLLIE=false
+NEXT_PUBLIC_ENABLE_RESEND=false
+```
+
+Then restart `npm run dev`.
+
+### 4) Create an admin user
+
+After signing up, set your role to ADMIN in Supabase SQL Editor:
+
+```sql
+update public.profiles set role = 'ADMIN' where id = '<USER_UUID>';
+```
+
 ## Mollie (test) - payment setup
 
 Add a `.env.local` file in this folder with:

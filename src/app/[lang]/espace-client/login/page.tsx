@@ -7,6 +7,8 @@ import { motion } from "framer-motion";
 import { ensureDemoUser, signIn } from "@/lib/mock-auth";
 import { seedDemo } from "@/lib/mock-dossiers";
 import { normalizeLang } from "@/lib/i18n";
+import { isSupabaseConfigured } from "@/lib/env";
+import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 export default function Page() {
   const params = useParams<{ lang: string }>();
@@ -68,13 +70,30 @@ export default function Page() {
             <button
               type="button"
               className="mt-2 inline-flex items-center justify-center rounded-2xl bg-[var(--color-primary)] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:opacity-95"
-              onClick={() => {
+              onClick={async () => {
                 setError(null);
-                const res = signIn(email, password);
-                if (!res.ok) {
-                  setError(res.error || "Erreur");
-                  return;
+                if (isSupabaseConfigured()) {
+                  try {
+                    const supabase = getSupabaseBrowserClient();
+                    const { error } = await supabase.auth.signInWithPassword({
+                      email,
+                      password,
+                    });
+                    if (error) {
+                      setError(error.message);
+                      return;
+                    }
+                    router.replace(next);
+                    return;
+                  } catch (e: unknown) {
+                    setError(e instanceof Error ? e.message : "Erreur");
+                    return;
+                  }
                 }
+
+                // Fallback (UI-only mode)
+                const res = signIn(email, password);
+                if (!res.ok) return setError(res.error || "Erreur");
                 router.replace(next);
               }}
             >
@@ -91,10 +110,23 @@ export default function Page() {
             <button
               type="button"
               className="inline-flex items-center justify-center rounded-2xl border border-[var(--color-sand)] bg-white/60 px-5 py-3 text-sm font-semibold text-[var(--color-primary)] transition hover:bg-[var(--color-beige)]"
-              onClick={() => {
+              onClick={async () => {
                 seedDemo();
                 ensureDemoUser();
-                signIn("demo@moconsult.local", "demo123");
+                if (isSupabaseConfigured()) {
+                  try {
+                    const supabase = getSupabaseBrowserClient();
+                    // Note: demo user must exist in Supabase to work in real mode.
+                    await supabase.auth.signInWithPassword({
+                      email: "demo@moconsult.local",
+                      password: "demo123",
+                    });
+                  } catch {
+                    // ignore
+                  }
+                } else {
+                  signIn("demo@moconsult.local", "demo123");
+                }
                 router.replace(`/${lang}/espace-client`);
               }}
               aria-label="Activer un compte test"

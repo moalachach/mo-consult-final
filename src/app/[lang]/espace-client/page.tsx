@@ -1,12 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import React from "react";
 import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { BadgeCheck, Clock3, FileText, XCircle } from "lucide-react";
 import { listDossiers } from "@/lib/mock-dossiers";
 import { getSession, signOut } from "@/lib/mock-auth";
 import { normalizeLang } from "@/lib/i18n";
+import { isSupabaseConfigured } from "@/lib/env";
+import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 function StatusPill({ status }: { status: string }) {
   const map: Record<string, { label: string; icon: any; cls: string }> = {
@@ -46,8 +49,47 @@ export default function Page() {
   const params = useParams<{ lang: string }>();
   const lang = normalizeLang(params.lang);
 
-  const dossiers = listDossiers();
-  const session = getSession();
+  const mockDossiers = listDossiers();
+  const [sessionEmail, setSessionEmail] = React.useState<string | null>(null);
+  const [dbDossiers, setDbDossiers] = React.useState<
+    Array<{ id: string; type: string; status: string; step_index: number; updated_at?: string | null }>
+  >([]);
+  const [dbLoaded, setDbLoaded] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!isSupabaseConfigured()) {
+      setSessionEmail(getSession()?.email ?? null);
+      return;
+    }
+    const run = async () => {
+      try {
+        const supabase = getSupabaseBrowserClient();
+        const { data } = await supabase.auth.getUser();
+        setSessionEmail(data.user?.email ?? null);
+      } catch {
+        setSessionEmail(null);
+      }
+    };
+    run();
+  }, []);
+
+  React.useEffect(() => {
+    if (!isSupabaseConfigured()) return;
+    const run = async () => {
+      try {
+        const res = await fetch("/api/dossiers/list", { cache: "no-store" });
+        const json = (await res.json()) as any;
+        if (json?.ok) setDbDossiers(json.dossiers || []);
+      } catch {
+        // ignore
+      } finally {
+        setDbLoaded(true);
+      }
+    };
+    run();
+  }, []);
+
+  const dossiers = isSupabaseConfigured() ? dbDossiers : mockDossiers;
 
   return (
     <div className="min-h-screen bg-[var(--color-beige)]">
@@ -63,13 +105,22 @@ export default function Page() {
           </div>
           <div className="flex items-center gap-2">
             <span className="hidden rounded-full border border-[var(--color-sand)] bg-white/60 px-3 py-2 text-sm text-[rgba(43,43,43,0.75)] sm:inline-flex">
-              {session?.email ?? "—"}
+              {sessionEmail ?? "—"}
             </span>
             <button
               type="button"
               className="rounded-2xl border border-[var(--color-sand)] bg-white/60 px-4 py-2 text-sm font-semibold text-[var(--color-primary)] transition hover:bg-[var(--color-beige)]"
-              onClick={() => {
-                signOut();
+              onClick={async () => {
+                if (isSupabaseConfigured()) {
+                  try {
+                    const supabase = getSupabaseBrowserClient();
+                    await supabase.auth.signOut();
+                  } catch {
+                    // ignore
+                  }
+                } else {
+                  signOut();
+                }
                 window.location.href = `/${lang}/espace-client/login`;
               }}
               aria-label="Se déconnecter"
@@ -79,7 +130,11 @@ export default function Page() {
           </div>
         </div>
 
-        {dossiers.length === 0 ? (
+        {isSupabaseConfigured() && !dbLoaded ? (
+          <div className="rounded-3xl border border-[var(--color-sand)] bg-white/70 p-8 text-center shadow-sm backdrop-blur">
+            <p className="text-sm font-semibold text-[var(--color-text)]">Chargement…</p>
+          </div>
+        ) : dossiers.length === 0 ? (
           <div className="rounded-3xl border border-[var(--color-sand)] bg-white/70 p-8 text-center shadow-sm backdrop-blur">
             <div className="mx-auto mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-white/70 text-[var(--color-accent)]">
               <FileText className="h-6 w-6" strokeWidth={2.2} />
@@ -119,7 +174,9 @@ export default function Page() {
                     </p>
                     <p className="mt-1 text-sm text-[rgba(43,43,43,0.70)]">
                       Mis à jour:{" "}
-                      {d.updatedAt ? new Date(d.updatedAt).toLocaleString() : "—"}
+                      {("updatedAt" in d && (d as any).updatedAt) || (d as any).updated_at
+                        ? new Date(((d as any).updatedAt || (d as any).updated_at) as string).toLocaleString()
+                        : "—"}
                     </p>
                   </div>
                   <div className="flex items-center gap-3">

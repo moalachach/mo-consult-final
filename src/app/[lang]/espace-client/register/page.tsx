@@ -6,6 +6,8 @@ import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { registerUser } from "@/lib/mock-auth";
 import { normalizeLang } from "@/lib/i18n";
+import { isSupabaseConfigured } from "@/lib/env";
+import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 export default function Page() {
   const params = useParams<{ lang: string }>();
@@ -81,13 +83,33 @@ export default function Page() {
             <button
               type="button"
               className="mt-2 inline-flex items-center justify-center rounded-2xl bg-[var(--color-primary)] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:opacity-95"
-              onClick={() => {
+              onClick={async () => {
                 setError(null);
-                const res = registerUser({ name, email, password });
-                if (!res.ok) {
-                  setError(res.error || "Erreur");
-                  return;
+                if (isSupabaseConfigured()) {
+                  try {
+                    const supabase = getSupabaseBrowserClient();
+                    const { error } = await supabase.auth.signUp({
+                      email,
+                      password,
+                      options: {
+                        data: { name },
+                      },
+                    });
+                    if (error) {
+                      setError(error.message);
+                      return;
+                    }
+                    router.replace(next);
+                    return;
+                  } catch (e: unknown) {
+                    setError(e instanceof Error ? e.message : "Erreur");
+                    return;
+                  }
                 }
+
+                // Fallback (UI-only mode)
+                const res = registerUser({ name, email, password });
+                if (!res.ok) return setError(res.error || "Erreur");
                 router.replace(next);
               }}
             >
