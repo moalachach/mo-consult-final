@@ -21,6 +21,21 @@ export default function Page() {
   const [password, setPassword] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
 
+  async function maybeRedirectAdmin() {
+    // When an admin logs in from the client space, we send them to the admin dashboard directly.
+    // This avoids confusion while keeping normal client redirects safe.
+    if (!isSupabaseConfigured()) {
+      return email.trim().toLowerCase() === "info@moconsult.be";
+    }
+    try {
+      const res = await fetch("/api/me", { cache: "no-store" });
+      const json = (await res.json()) as any;
+      return json?.ok && json?.role === "ADMIN";
+    } catch {
+      return false;
+    }
+  }
+
   function safeNext(rawNext: string | null) {
     // Prevent accidental redirects into admin when the user is logging in from client space.
     // Only allow redirects within the client space for this page.
@@ -95,6 +110,10 @@ export default function Page() {
                     }
                     // If the user filled the wizard as a guest, import drafts now so admin can see them.
                     await importLocalDraftsToSupabase();
+                    if (await maybeRedirectAdmin()) {
+                      router.replace("/admin/dashboard");
+                      return;
+                    }
                     router.replace(next);
                     return;
                   } catch (e: unknown) {
@@ -106,6 +125,10 @@ export default function Page() {
                 // Fallback (UI-only mode)
                 const res = signIn(email, password);
                 if (!res.ok) return setError(res.error || "Erreur");
+                if (await maybeRedirectAdmin()) {
+                  router.replace("/admin/dashboard");
+                  return;
+                }
                 router.replace(next);
               }}
             >
