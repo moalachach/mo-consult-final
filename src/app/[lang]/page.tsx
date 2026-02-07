@@ -93,56 +93,56 @@ const content = {
       { title: "Numéro d’entreprise", icon: Building2 },
       { title: "Vous démarrez", icon: Users },
     ],
-    partnersTitle: "Nos partenaires",
-    partners: [
-      {
-        key: "notaire",
-        title: "Notaires",
-        icon: Landmark,
-        items: [
-          {
-            name: "Indekeu, Cleenewerck & Decrayencour",
-            slug: "indekeu-cleenewerck-decrayencour",
-          },
-        ],
-      },
-      {
-        key: "comptable",
-        title: "Comptables",
-        icon: BadgeCheck,
-        items: [
-          { name: "SM COMPTA", slug: "sm-compta" },
-          { name: "ATISCOM", slug: "atiscom" },
-          { name: "KIUACCOUNT", slug: "kiuaccount" },
-        ],
-      },
-      {
-        key: "domiciliation",
-        title: "Domiciliation",
-        icon: Building2,
-        items: [
-          {
-            name: "ED PARTNERS",
-            slug: "ed-partners",
-          },
-        ],
-      },
-      {
-        key: "caisse_sociale",
-        title: "Caisses sociales",
-        icon: ShieldCheck,
-        items: [
-          { name: "Liantis", slug: "liantis" },
-          { name: "Partena Professionel", slug: "partena-professionel" },
-        ],
-      },
-      {
-        key: "design",
-        title: "Design",
-        icon: Sparkles,
-        items: [{ name: "JUDesign", slug: "judesign" }],
-      },
-    ],
+	    partnersTitle: "Nos partenaires",
+	    partnerCtaView: "Voir la fiche",
+	    partnerTagWebsite: "Site web",
+	    partners: [
+	      {
+	        key: "notaire",
+	        title: "Notaires",
+	        icon: Landmark,
+	        lead: "Pour l’acte et le rendez-vous.",
+	        items: [
+	          {
+	            name: "Indekeu, Cleenewerck & Decrayencour",
+	            slug: "indekeu-cleenewerck-decrayencour",
+	          },
+	        ],
+	      },
+	      {
+	        key: "comptable",
+	        title: "Comptables",
+	        icon: BadgeCheck,
+	        lead: "Conseil, TVA et suivi comptable.",
+	        items: [
+	          { name: "SM COMPTA", slug: "sm-compta" },
+	          { name: "ATISCOM", slug: "atiscom" },
+	          { name: "KIUACCOUNT", slug: "kiuaccount" },
+	        ],
+	      },
+	      {
+	        key: "domiciliation",
+	        title: "Domiciliation",
+	        icon: Building2,
+	        lead: "Siège social + unité d’établissement.",
+	        items: [
+	          {
+	            name: "ED PARTNERS",
+	            slug: "ed-partners",
+	          },
+	        ],
+	      },
+	      {
+	        key: "caisse_sociale",
+	        title: "Caisses sociales",
+	        icon: ShieldCheck,
+	        lead: "Affiliation et cotisations.",
+	        items: [
+	          { name: "Liantis", slug: "liantis" },
+	          { name: "Partena Professionel", slug: "partena-professionel" },
+	        ],
+	      },
+	    ],
     contactTitle: "Contact",
     contactLead:
       "Une question avant de démarrer ? Écrivez-nous, on vous répond rapidement.",
@@ -223,56 +223,56 @@ const content = {
       { title: "Ondernemingsnummer", icon: Building2 },
       { title: "U start", icon: Users },
     ],
-    partnersTitle: "Partners",
-    partners: [
-      {
-        key: "notaire",
-        title: "Notarissen",
-        icon: Landmark,
-        items: [
-          {
-            name: "Indekeu, Cleenewerck & Decrayencour",
-            slug: "indekeu-cleenewerck-decrayencour",
-          },
-        ],
-      },
-      {
-        key: "comptable",
-        title: "Accountants",
-        icon: BadgeCheck,
-        items: [
-          { name: "SM COMPTA", slug: "sm-compta" },
-          { name: "ATISCOM", slug: "atiscom" },
-          { name: "KIUACCOUNT", slug: "kiuaccount" },
-        ],
-      },
-      {
-        key: "domiciliation",
-        title: "Domicilie",
-        icon: Building2,
-        items: [
-          {
-            name: "ED PARTNERS",
-            slug: "ed-partners",
-          },
-        ],
-      },
-      {
-        key: "caisse_sociale",
-        title: "Sociale fondsen",
-        icon: ShieldCheck,
-        items: [
-          { name: "Liantis", slug: "liantis" },
-          { name: "Partena Professionel", slug: "partena-professionel" },
-        ],
-      },
-      {
-        key: "design",
-        title: "Design",
-        icon: Sparkles,
-        items: [{ name: "JUDesign", slug: "judesign" }],
-      },
-    ],
+	    partnersTitle: "Partners",
+	    partnerCtaView: "Bekijk fiche",
+	    partnerTagWebsite: "Website",
+	    partners: [
+	      {
+	        key: "notaire",
+	        title: "Notarissen",
+	        icon: Landmark,
+	        lead: "Voor de akte en afspraak.",
+	        items: [
+	          {
+	            name: "Indekeu, Cleenewerck & Decrayencour",
+	            slug: "indekeu-cleenewerck-decrayencour",
+	          },
+	        ],
+	      },
+	      {
+	        key: "comptable",
+	        title: "Accountants",
+	        icon: BadgeCheck,
+	        lead: "Advies, btw en boekhouding.",
+	        items: [
+	          { name: "SM COMPTA", slug: "sm-compta" },
+	          { name: "ATISCOM", slug: "atiscom" },
+	          { name: "KIUACCOUNT", slug: "kiuaccount" },
+	        ],
+	      },
+	      {
+	        key: "domiciliation",
+	        title: "Domicilie",
+	        icon: Building2,
+	        lead: "Zetel + vestigingseenheid.",
+	        items: [
+	          {
+	            name: "ED PARTNERS",
+	            slug: "ed-partners",
+	          },
+	        ],
+	      },
+	      {
+	        key: "caisse_sociale",
+	        title: "Sociale fondsen",
+	        icon: ShieldCheck,
+	        lead: "Aansluiting en bijdragen.",
+	        items: [
+	          { name: "Liantis", slug: "liantis" },
+	          { name: "Partena Professionel", slug: "partena-professionel" },
+	        ],
+	      },
+	    ],
     contactTitle: "Contact",
     contactLead: "Een vraag voor u start? Stuur ons een bericht, we antwoorden snel.",
     contactCtaPrimary: "Start mijn bedrijf",
@@ -352,56 +352,56 @@ const content = {
       { title: "Company number", icon: Building2 },
       { title: "You start", icon: Users },
     ],
-    partnersTitle: "Partners",
-    partners: [
-      {
-        key: "notaire",
-        title: "Notaries",
-        icon: Landmark,
-        items: [
-          {
-            name: "Indekeu, Cleenewerck & Decrayencour",
-            slug: "indekeu-cleenewerck-decrayencour",
-          },
-        ],
-      },
-      {
-        key: "comptable",
-        title: "Accountants",
-        icon: BadgeCheck,
-        items: [
-          { name: "SM COMPTA", slug: "sm-compta" },
-          { name: "ATISCOM", slug: "atiscom" },
-          { name: "KIUACCOUNT", slug: "kiuaccount" },
-        ],
-      },
-      {
-        key: "domiciliation",
-        title: "Domiciliation",
-        icon: Building2,
-        items: [
-          {
-            name: "ED PARTNERS",
-            slug: "ed-partners",
-          },
-        ],
-      },
-      {
-        key: "caisse_sociale",
-        title: "Social funds",
-        icon: ShieldCheck,
-        items: [
-          { name: "Liantis", slug: "liantis" },
-          { name: "Partena Professionel", slug: "partena-professionel" },
-        ],
-      },
-      {
-        key: "design",
-        title: "Design",
-        icon: Sparkles,
-        items: [{ name: "JUDesign", slug: "judesign" }],
-      },
-    ],
+	    partnersTitle: "Partners",
+	    partnerCtaView: "View profile",
+	    partnerTagWebsite: "Website",
+	    partners: [
+	      {
+	        key: "notaire",
+	        title: "Notaries",
+	        icon: Landmark,
+	        lead: "For the deed and appointment.",
+	        items: [
+	          {
+	            name: "Indekeu, Cleenewerck & Decrayencour",
+	            slug: "indekeu-cleenewerck-decrayencour",
+	          },
+	        ],
+	      },
+	      {
+	        key: "comptable",
+	        title: "Accountants",
+	        icon: BadgeCheck,
+	        lead: "Advice, VAT and bookkeeping.",
+	        items: [
+	          { name: "SM COMPTA", slug: "sm-compta" },
+	          { name: "ATISCOM", slug: "atiscom" },
+	          { name: "KIUACCOUNT", slug: "kiuaccount" },
+	        ],
+	      },
+	      {
+	        key: "domiciliation",
+	        title: "Domiciliation",
+	        icon: Building2,
+	        lead: "Registered seat + establishment unit.",
+	        items: [
+	          {
+	            name: "ED PARTNERS",
+	            slug: "ed-partners",
+	          },
+	        ],
+	      },
+	      {
+	        key: "caisse_sociale",
+	        title: "Social funds",
+	        icon: ShieldCheck,
+	        lead: "Affiliation and contributions.",
+	        items: [
+	          { name: "Liantis", slug: "liantis" },
+	          { name: "Partena Professionel", slug: "partena-professionel" },
+	        ],
+	      },
+	    ],
     contactTitle: "Contact",
     contactLead: "Have a question before you start? Message us and we’ll reply quickly.",
     contactCtaPrimary: "Start my company",
@@ -582,79 +582,101 @@ export default async function Page({ params }: { params: Promise<{ lang: string 
         </div>
       </FadeIn>
 
-      {/* PARTNERS */}
-      <FadeIn className="mx-auto max-w-6xl px-4 pb-24 md:pb-28" id="partenaires">
-        <div className="flex items-center justify-between">
-          <h2 className="text-3xl font-semibold text-primary">{t.partnersTitle}</h2>
-          <Badge>Réseau</Badge>
-        </div>
-
-	        <div className="mt-8 grid items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3">
-	          {t.partners.map((p) => {
-	            const Icon = p.icon;
-	            const key = (p as any).key as string;
-	            const dbItems = partnersAll.filter((x) => x.category === key);
-	            const items = (dbItems.length > 0 ? dbItems : (p as any).items) as Array<{
-	              slug: string;
-	              name: string;
-	              logoText?: string;
-	            }>;
-	            return (
-	              <Card
-	                key={p.title}
-	                className="flex h-full flex-col overflow-hidden p-7 shadow-soft-sm"
-              >
-                <div className="flex items-start gap-4">
-                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-[rgba(31,143,95,0.12)] text-[var(--color-accent)]">
-                    <Icon className="h-5 w-5" strokeWidth={2.2} />
-                  </span>
-                  <div className="flex-1">
-                    <p className="text-lg font-semibold text-primary">{p.title}</p>
-                    <p className="mt-2 text-sm text-[rgba(43,43,43,0.70)]">
-                      Partenaires (liens + logos bientôt).
-                    </p>
-
-	                    <div className="mt-5 grid flex-1 gap-3">
-	                      {items.length === 0 ? (
-	                        <div className="rounded-2xl border border-sand bg-white/60 px-4 py-3 text-sm text-[rgba(43,43,43,0.70)]">
-	                          Aucun partenaire pour l’instant.
-	                        </div>
-	                      ) : (
-	                        items.map((it) => (
-	                          <Link
-	                            key={it.slug}
-	                            href={`/${lang}/partenaires/${it.slug}`}
-	                            className="flex max-w-full items-start justify-between gap-3 rounded-2xl border border-sand bg-white/60 px-4 py-3 transition hover:bg-white/80"
-	                          >
-	                            <div className="min-w-0 flex-1">
-	                              <p
-	                                className="truncate text-sm font-semibold text-primary"
-	                                title={it.name}
-	                              >
-	                                {it.name}
-	                              </p>
-	                              <p className="mt-1 text-xs leading-5 text-[rgba(43,43,43,0.60)]">
-	                                Voir la fiche partenaire
-	                              </p>
-	                            </div>
-	                            <span
-	                              aria-hidden
-	                              className="mt-0.5 inline-flex h-10 w-10 flex-none items-center justify-center rounded-2xl border border-sand bg-white/80 text-xs font-semibold text-primary"
-	                              title="Logo (placeholder)"
-	                            >
-	                              {it.logoText || (it.name.trim()[0] || "•").toUpperCase()}
-	                            </span>
-	                          </Link>
-	                        ))
-	                      )}
-	                    </div>
-	                  </div>
-	                </div>
-	              </Card>
-	            );
-	          })}
+	      {/* PARTNERS */}
+	      <FadeIn className="mx-auto max-w-6xl px-4 pb-24 md:pb-28" id="partenaires">
+	        <div className="flex items-center justify-between">
+	          <h2 className="text-3xl font-semibold text-primary">{t.partnersTitle}</h2>
+	          <Badge>Réseau</Badge>
 	        </div>
-      </FadeIn>
+	
+		        <div className="mt-8 grid items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-4">
+		          {t.partners.map((p) => {
+		            const Icon = p.icon;
+		            const key = (p as any).key as string;
+		            const dbItems = partnersAll.filter((x) => x.category === key);
+		            const items = (dbItems.length > 0 ? dbItems : (p as any).items) as Array<{
+		              slug: string;
+		              name: string;
+		              city?: string;
+		              website?: string;
+		              logoText?: string;
+		            }>;
+		            const short = items.slice(0, 3);
+		            return (
+		              <Card
+		                key={p.title}
+		                className="flex h-full flex-col overflow-hidden p-7 shadow-soft-sm"
+	              >
+	                <div className="flex items-start gap-4">
+	                  <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-[rgba(31,143,95,0.12)] text-[var(--color-accent)]">
+	                    <Icon className="h-5 w-5" strokeWidth={2.2} />
+	                  </span>
+	                  <div className="flex-1">
+	                    <p className="text-lg font-semibold text-primary">{p.title}</p>
+	                    <p className="mt-2 text-sm text-[rgba(43,43,43,0.70)]">{(p as any).lead}</p>
+	
+		                    <div className="mt-5 grid flex-1 gap-3">
+		                      {short.length === 0 ? (
+		                        <div className="rounded-2xl border border-sand bg-white/60 px-4 py-3 text-sm text-[rgba(43,43,43,0.70)]">
+		                          Aucun partenaire pour l’instant.
+		                        </div>
+		                      ) : (
+			                        short.map((it) => {
+			                          const tags = [
+			                            it.city ? String(it.city) : null,
+			                            it.website ? (t as any).partnerTagWebsite : null,
+			                          ].filter(Boolean) as string[];
+			                          return (
+		                            <div
+		                              key={it.slug}
+		                              className="flex max-w-full items-start justify-between gap-3 rounded-2xl border border-sand bg-white/60 px-4 py-3"
+		                            >
+		                              <div className="flex min-w-0 flex-1 items-start gap-3">
+		                                <span
+		                                  aria-hidden
+		                                  className="mt-0.5 inline-flex h-10 w-10 flex-none items-center justify-center rounded-2xl border border-sand bg-white/80 text-xs font-semibold text-primary"
+		                                  title="Logo (placeholder)"
+		                                >
+		                                  {it.logoText || (it.name.trim()[0] || "•").toUpperCase()}
+		                                </span>
+		                                <div className="min-w-0 flex-1">
+		                                  <p
+		                                    className="truncate text-sm font-semibold text-primary"
+		                                    title={it.name}
+		                                  >
+		                                    {it.name}
+		                                  </p>
+		                                  <div className="mt-2 flex flex-wrap gap-2">
+		                                    {tags.slice(0, 2).map((tag) => (
+		                                      <span
+		                                        key={tag}
+		                                        className="inline-flex items-center rounded-full border border-sand bg-white/70 px-2.5 py-1 text-[11px] font-semibold text-[rgba(43,43,43,0.72)]"
+		                                      >
+		                                        {tag}
+		                                      </span>
+		                                    ))}
+		                                  </div>
+		                                </div>
+		                              </div>
+			                              <Link
+			                                href={`/${lang}/partenaires/${it.slug}`}
+			                                className="whitespace-nowrap rounded-xl border border-sand bg-white/70 px-3 py-2 text-xs font-semibold text-[var(--color-primary)] transition hover:bg-white/90"
+			                              >
+			                                {(t as any).partnerCtaView}
+			                              </Link>
+		                            </div>
+			                          );
+			                        })
+			                        )
+				                      }
+				                    </div>
+		                  </div>
+		                </div>
+		              </Card>
+		            );
+		          })}
+		        </div>
+	      </FadeIn>
 
       {/* CONTACT */}
       <FadeIn className="mx-auto max-w-6xl px-4 pb-24 md:pb-28" id="contact">

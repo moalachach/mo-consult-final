@@ -16,9 +16,14 @@ export type Partner = {
   city?: string;
   address?: string;
   phone?: string;
+  whatsapp?: string; // e.g. "+32499..." or "https://wa.me/..."
   email?: string;
   vat?: string;
   description?: string;
+  linkedin?: string;
+  instagram?: string;
+  formLink?: string;
+  services?: string[]; // UI-only for now
   // UI-only for now: later we can store a real logo file.
   logoText?: string;
 };
@@ -30,6 +35,7 @@ export const fallbackPartners: Partner[] = [
     name: "Indekeu, Cleenewerck & Decrayencour",
     website: "https://indekeu-cleenewerckdecrayencour.be/fr",
     city: "Bruxelles",
+    services: ["Création SRL", "Actes notariés", "Rendez-vous notaire"],
     logoText: "N",
   },
   {
@@ -38,6 +44,7 @@ export const fallbackPartners: Partner[] = [
     name: "SM COMPTA",
     website: "https://smcompta.be",
     city: "Belgique",
+    services: ["Comptabilité", "TVA", "Conseil"],
     logoText: "SM",
   },
   {
@@ -45,6 +52,7 @@ export const fallbackPartners: Partner[] = [
     category: "comptable",
     name: "ATISCOM",
     city: "Belgique",
+    services: ["Comptabilité", "TVA", "Conseil"],
     logoText: "A",
   },
   {
@@ -52,6 +60,7 @@ export const fallbackPartners: Partner[] = [
     category: "comptable",
     name: "KIUACCOUNT",
     city: "Belgique",
+    services: ["Comptabilité", "TVA", "Conseil"],
     logoText: "K",
   },
   {
@@ -60,6 +69,7 @@ export const fallbackPartners: Partner[] = [
     name: "ED PARTNERS",
     website: "https://ed-partners.be/index.php/je-cree-mon-siege-social/partenaire-mo-consult/",
     city: "Belgique",
+    services: ["Siège social", "Unité d’établissement", "Bail / attestation"],
     logoText: "ED",
   },
   {
@@ -67,6 +77,7 @@ export const fallbackPartners: Partner[] = [
     category: "caisse_sociale",
     name: "Liantis",
     city: "Belgique",
+    services: ["Affiliation", "Cotisations", "Conseil"],
     logoText: "L",
   },
   {
@@ -74,6 +85,7 @@ export const fallbackPartners: Partner[] = [
     category: "caisse_sociale",
     name: "Partena Professionel",
     city: "Belgique",
+    services: ["Affiliation", "Cotisations", "Conseil"],
     logoText: "P",
   },
   {
@@ -81,6 +93,7 @@ export const fallbackPartners: Partner[] = [
     category: "design",
     name: "JUDesign",
     city: "Belgique",
+    services: ["Logo", "Charte graphique", "Supports"],
     logoText: "JU",
   },
 ];
@@ -108,9 +121,14 @@ export async function listPartnersServer() {
       city: p.city ?? undefined,
       address: p.address ?? undefined,
       phone: p.phone ?? undefined,
+      whatsapp: p.whatsapp ?? undefined,
       email: p.email ?? undefined,
       vat: p.vat ?? undefined,
       description: p.description ?? undefined,
+      linkedin: p.linkedin ?? undefined,
+      instagram: p.instagram ?? undefined,
+      formLink: p.form_link ?? p.formLink ?? undefined,
+      services: p.services ?? undefined,
       logoText: (p.name || "").split(/\s+/).slice(0, 2).map((x: string) => x[0]).join("").toUpperCase(),
     }));
   } catch {
@@ -136,9 +154,14 @@ export async function getPartnerBySlugServer(slug: string) {
       city: data.city ?? undefined,
       address: data.address ?? undefined,
       phone: data.phone ?? undefined,
+      whatsapp: (data as any).whatsapp ?? undefined,
       email: data.email ?? undefined,
       vat: data.vat ?? undefined,
       description: data.description ?? undefined,
+      linkedin: (data as any).linkedin ?? undefined,
+      instagram: (data as any).instagram ?? undefined,
+      formLink: (data as any).form_link ?? (data as any).formLink ?? undefined,
+      services: (data as any).services ?? undefined,
       logoText: (data.name || "").split(/\s+/).slice(0, 2).map((x: string) => x[0]).join("").toUpperCase(),
     } as Partner;
   } catch {
