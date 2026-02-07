@@ -28,39 +28,62 @@ const content = {
 	    primaryCta: "Créer mon entreprise",
 	    secondaryCta: "Voir comment ça marche",
 	    trust: ["Plan financier inclus", "Dossier notaire inclus", "Paiement sécurisé"],
-	    offersTitle: "Choisissez votre situation",
-	    packsCta: "Choisir ce pack",
+	    offersTitle: "Choisissez votre service",
+	    packsCtaStart: "Commencer",
+	    packsCtaChoose: "Choisir ce pack",
+	    packsCtaPartners: "Découvrir les partenaires",
+	    packsRecommended: "Recommandé",
 	    packs: [
 	      {
 	        id: "base",
-	        title: "Pack A — Création (base)",
-	        price: "À partir de 200€",
-	        idealFor: "Idéal pour démarrer vite et clair.",
-	        bullets: ["Dossier complet", "Suivi en ligne", "Support humain"],
+	        title: "Pack 1 — Création d’entreprise (Base)",
+	        price: "À partir de 200€ (PP) / 1.250€ (SRL)",
+	        idealFor: "Idéal pour : démarrer vite avec un dossier complet",
+	        bullets: [
+	          "Dossier BCE + activation",
+	          "TVA (si nécessaire)",
+	          "Caisse sociale / affiliations",
+	          "Checklist documents + suivi",
+	        ],
 	        recommended: false,
 	      },
 	      {
 	        id: "branding",
-	        title: "Pack B — Création + Charte graphique",
-	        price: "À partir de 600€",
-	        idealFor: "Idéal pour lancer une marque solide.",
-	        bullets: ["Logo + charte PDF", "Variantes de logo", "Kit réseaux sociaux (base)"],
-	        recommended: false,
-	      },
-	      {
-	        id: "domiciliation",
-	        title: "Pack C — Création + Domiciliation",
+	        title: "Pack 2 — Création + Charte graphique",
 	        price: "Sur devis",
-	        idealFor: "Idéal si vous n’avez pas encore d’adresse pro.",
-	        bullets: ["Siège social", "Unité d’établissement", "Accompagnement administratif"],
+	        idealFor: "Idéal pour : lancer une marque crédible dès le 1er jour",
+	        bullets: [
+	          "Logo (2–3 propositions)",
+	          "Charte (couleurs, typographies, usages)",
+	          "Versions réseaux sociaux",
+	          "Fichier PDF + exports",
+	        ],
 	        recommended: true,
 	      },
 	      {
-	        id: "partners",
-	        title: "Pack D — Pack Partenaires",
+	        id: "domiciliation",
 	        price: "Sur devis",
-	        idealFor: "Idéal si vous voulez tout centraliser.",
-	        bullets: ["Comptable + design + domiciliation", "Devis coordonné", "Un seul interlocuteur"],
+	        title: "Pack 3 — Création + Domiciliation (Siège + UE)",
+	        idealFor: "Idéal pour : séparer privé/pro et être conforme",
+	        bullets: [
+	          "Domiciliation siège social",
+	          "Unité d’établissement",
+	          "Courrier & attestations",
+	          "Accompagnement administratif",
+	        ],
+	        recommended: false,
+	      },
+	      {
+	        id: "partners",
+	        price: "Sur devis",
+	        title: "Pack 4 — Pack Partenaires (Services groupés)",
+	        idealFor: "Idéal pour : avoir les bons contacts au bon moment",
+	        bullets: [
+	          "Notaire / comptable / banque",
+	          "Caisse sociale / assurances",
+	          "Domiciliation (si besoin)",
+	          "Mise en relation + suivi",
+	        ],
 	        recommended: false,
 	      },
 	    ],
@@ -209,39 +232,62 @@ const content = {
     primaryCta: "Start mijn bedrijf",
 	    secondaryCta: "Bekijk hoe het werkt",
 	    trust: ["Financieel plan inbegrepen", "Notarisdossier inbegrepen", "Veilige betaling"],
-	    offersTitle: "Kies uw situatie",
-	    packsCta: "Kies dit pack",
+	    offersTitle: "Kies uw pakket",
+	    packsCtaStart: "Starten",
+	    packsCtaChoose: "Kies dit pakket",
+	    packsCtaPartners: "Bekijk partners",
+	    packsRecommended: "Aanbevolen",
 	    packs: [
 	      {
 	        id: "base",
-	        title: "Pack A — Oprichting (basis)",
-	        price: "Vanaf €200",
-	        idealFor: "Ideaal om snel en duidelijk te starten.",
-	        bullets: ["Volledig dossier", "Online opvolging", "Menselijke ondersteuning"],
+	        title: "Pakket 1 — Bedrijf oprichten (Basis)",
+	        price: "Vanaf €200 (PP) / €1.250 (SRL)",
+	        idealFor: "Ideaal om snel te starten met een volledig dossier",
+	        bullets: [
+	          "BCE-dossier + activatie",
+	          "BTW (indien nodig)",
+	          "Sociaal fonds / aansluitingen",
+	          "Documentenchecklist + opvolging",
+	        ],
 	        recommended: false,
 	      },
 	      {
 	        id: "branding",
-	        title: "Pack B — Oprichting + huisstijl",
-	        price: "Vanaf €600",
-	        idealFor: "Ideaal voor een sterke merkstart.",
-	        bullets: ["Logo + PDF-huisstijl", "Logo varianten", "Social kit (basis)"],
-	        recommended: false,
-	      },
-	      {
-	        id: "domiciliation",
-	        title: "Pack C — Oprichting + domicilie",
+	        title: "Pakket 2 — Oprichting + Huisstijl",
 	        price: "Offerte",
-	        idealFor: "Ideaal als u nog geen professioneel adres hebt.",
-	        bullets: ["Maatschappelijke zetel", "Vestigingseenheid", "Administratieve begeleiding"],
+	        idealFor: "Ideaal om meteen een geloofwaardig merk te lanceren",
+	        bullets: [
+	          "Logo (2–3 voorstellen)",
+	          "Huisstijl (kleuren, typografie, gebruik)",
+	          "Social media versies",
+	          "PDF + exports",
+	        ],
 	        recommended: true,
 	      },
 	      {
-	        id: "partners",
-	        title: "Pack D — Partnerpack",
+	        id: "domiciliation",
 	        price: "Offerte",
-	        idealFor: "Ideaal als u alles wilt centraliseren.",
-	        bullets: ["Accountant + design + domicilie", "Gecombineerde offerte", "Eén aanspreekpunt"],
+	        title: "Pakket 3 — Oprichting + Domicilie (Zetel + UE)",
+	        idealFor: "Ideaal om privé/pro te scheiden en conform te blijven",
+	        bullets: [
+	          "Domicilie maatschappelijke zetel",
+	          "Vestigingseenheid",
+	          "Post & attesten",
+	          "Administratieve begeleiding",
+	        ],
+	        recommended: false,
+	      },
+	      {
+	        id: "partners",
+	        price: "Offerte",
+	        title: "Pakket 4 — Partners (gegroepeerde diensten)",
+	        idealFor: "Ideaal om de juiste contacten op het juiste moment te hebben",
+	        bullets: [
+	          "Notaris / accountant / bank",
+	          "Sociaal fonds / verzekeringen",
+	          "Domicilie (indien nodig)",
+	          "Intro + opvolging",
+	        ],
 	        recommended: false,
 	      },
 	    ],
@@ -389,39 +435,62 @@ const content = {
     primaryCta: "Start my company",
 	    secondaryCta: "See how it works",
 	    trust: ["Financial plan included", "Notary package included", "Secure payment"],
-	    offersTitle: "Choose your situation",
-	    packsCta: "Choose this pack",
+	    offersTitle: "Choose your pack",
+	    packsCtaStart: "Get started",
+	    packsCtaChoose: "Choose this pack",
+	    packsCtaPartners: "Explore partners",
+	    packsRecommended: "Recommended",
 	    packs: [
 	      {
 	        id: "base",
-	        title: "Pack A — Creation (base)",
-	        price: "From €200",
-	        idealFor: "Best for a quick, clear start.",
-	        bullets: ["Complete file", "Online tracking", "Human support"],
+	        title: "Pack 1 — Company creation (Base)",
+	        price: "From €200 (PP) / €1,250 (SRL)",
+	        idealFor: "Best for starting fast with a complete file",
+	        bullets: [
+	          "BCE file + activation",
+	          "VAT (if needed)",
+	          "Social fund / affiliations",
+	          "Documents checklist + tracking",
+	        ],
 	        recommended: false,
 	      },
 	      {
 	        id: "branding",
-	        title: "Pack B — Creation + Brand guidelines",
-	        price: "From €600",
-	        idealFor: "Best for launching a strong brand.",
-	        bullets: ["Logo + PDF guidelines", "Logo variants", "Social kit (basic)"],
-	        recommended: false,
-	      },
-	      {
-	        id: "domiciliation",
-	        title: "Pack C — Creation + Domiciliation",
+	        title: "Pack 2 — Creation + Brand guidelines",
 	        price: "Quote",
-	        idealFor: "Best if you don’t have a business address yet.",
-	        bullets: ["Registered seat", "Establishment unit", "Admin support"],
+	        idealFor: "Best for launching a credible brand from day one",
+	        bullets: [
+	          "Logo (2–3 proposals)",
+	          "Guidelines (colors, typography, usage)",
+	          "Social media versions",
+	          "PDF + exports",
+	        ],
 	        recommended: true,
 	      },
 	      {
-	        id: "partners",
-	        title: "Pack D — Partners pack",
+	        id: "domiciliation",
 	        price: "Quote",
-	        idealFor: "Best if you want everything centralized.",
-	        bullets: ["Accountant + design + domiciliation", "Coordinated quote", "Single point of contact"],
+	        title: "Pack 3 — Creation + Domiciliation (Seat + Unit)",
+	        idealFor: "Best to separate private/pro and stay compliant",
+	        bullets: [
+	          "Registered seat domiciliation",
+	          "Establishment unit",
+	          "Mail & certificates",
+	          "Admin support",
+	        ],
+	        recommended: false,
+	      },
+	      {
+	        id: "partners",
+	        price: "Quote",
+	        title: "Pack 4 — Partners pack (Bundled services)",
+	        idealFor: "Best to have the right contacts at the right time",
+	        bullets: [
+	          "Notary / accountant / bank",
+	          "Social fund / insurance",
+	          "Domiciliation (if needed)",
+	          "Intro + follow-up",
+	        ],
 	        recommended: false,
 	      },
 	    ],
@@ -645,7 +714,7 @@ export default async function Page({ params }: { params: Promise<{ lang: string 
                     </p>
                     <p className="mt-3 text-sm text-[rgba(43,43,43,0.72)]">{p.idealFor}</p>
                   </div>
-                  {p.recommended ? <Badge tone="accent">Recommandé</Badge> : null}
+                  {p.recommended ? <Badge tone="accent">{t.packsRecommended}</Badge> : null}
                 </div>
 
                 <div className="mt-4 flex flex-wrap gap-2">
@@ -666,10 +735,18 @@ export default async function Page({ params }: { params: Promise<{ lang: string 
 
               <div className="mt-7 inline-flex">
                 <ButtonLink
-                  href={`/${lang}/creer-entreprise?pack=${encodeURIComponent(p.id)}`}
+                  href={
+                    p.id === "partners"
+                      ? `/${lang}/#partenaires`
+                      : `/${lang}/creer-entreprise?pack=${encodeURIComponent(p.id)}`
+                  }
                   className="w-full whitespace-nowrap sm:w-auto"
                 >
-                  {t.packsCta}
+                  {p.id === "base"
+                    ? t.packsCtaStart
+                    : p.id === "partners"
+                      ? t.packsCtaPartners
+                      : t.packsCtaChoose}
                 </ButtonLink>
               </div>
             </Card>
