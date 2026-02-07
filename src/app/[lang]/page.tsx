@@ -5,14 +5,13 @@ import { FadeIn } from "@/components/fade-in";
 import { ButtonLink } from "@/components/button-link";
 import { listPartnersServer } from "@/lib/partners";
 import {
-  BadgeCheck,
-  Building2,
-  CheckCircle2,
-  Code2,
-  FileText,
-  Landmark,
-  MonitorSmartphone,
-  Palette,
+	  BadgeCheck,
+	  Building2,
+	  CheckCircle2,
+	  FileText,
+	  Landmark,
+	  MonitorSmartphone,
+	  Palette,
   PiggyBank,
   ShieldCheck,
   Signature,
@@ -66,20 +65,23 @@ const content = {
 	    ],
 	    processTitle: "Le processus, simplement",
 	    servicesTitle: "Nos services",
-	    services: [
+    services: [
       {
         title: "Création d’entreprise",
-        lead: "SRL ou indépendant: un parcours guidé et un suivi clair.",
+        lead: "Dossier complet et suivi en ligne, étape par étape.",
+        tags: ["SRL / PP", "Suivi en ligne"],
         icon: Building2,
       },
       {
         title: "Charte graphique & logo",
-        lead: "Une identité cohérente, moderne et professionnelle pour votre société.",
+        lead: "Logo, charte PDF et variantes pour une identité cohérente.",
+        tags: ["Logo", "Charte PDF"],
         icon: Palette,
       },
       {
         title: "Site web professionnel",
-        lead: "WordPress ou sur mesure (code) selon vos besoins.",
+        lead: "Site vitrine avec SEO de base et formulaire de contact.",
+        tags: ["Vitrine", "SEO de base"],
         icon: MonitorSmartphone,
       },
     ],
@@ -193,20 +195,23 @@ const content = {
 	    ],
 	    processTitle: "Het proces, eenvoudig",
 	    servicesTitle: "Onze diensten",
-	    services: [
+    services: [
       {
         title: "Bedrijf oprichten",
-        lead: "SRL of zelfstandige: een begeleid traject met duidelijke opvolging.",
+        lead: "Volledig dossier en online opvolging, stap voor stap.",
+        tags: ["SRL / PP", "Online opvolging"],
         icon: Building2,
       },
       {
         title: "Huisstijl & logo",
-        lead: "Een consistente, moderne en professionele identiteit voor uw onderneming.",
+        lead: "Logo, PDF-huisstijl en varianten voor een consistente identiteit.",
+        tags: ["Logo", "PDF-huisstijl"],
         icon: Palette,
       },
       {
         title: "Professionele website",
-        lead: "WordPress of maatwerk (code), afhankelijk van uw behoeften.",
+        lead: "Vitrinesite met basis SEO en contactformulier.",
+        tags: ["Vitrine", "Basis SEO"],
         icon: MonitorSmartphone,
       },
     ],
@@ -319,20 +324,23 @@ const content = {
 	    ],
 	    processTitle: "The process, simple",
 	    servicesTitle: "Our services",
-	    services: [
+    services: [
       {
         title: "Company creation",
-        lead: "SRL or sole proprietor: a guided path with clear tracking.",
+        lead: "Complete file with step-by-step online tracking.",
+        tags: ["SRL / Sole", "Online tracking"],
         icon: Building2,
       },
       {
         title: "Brand guidelines & logo",
-        lead: "A consistent, modern and professional identity for your company.",
+        lead: "Logo, PDF guidelines and variants for a consistent identity.",
+        tags: ["Logo", "PDF guidelines"],
         icon: Palette,
       },
       {
         title: "Professional website",
-        lead: "WordPress or custom code, depending on your needs.",
+        lead: "Landing website with basic SEO and a contact form.",
+        tags: ["Website", "Basic SEO"],
         icon: MonitorSmartphone,
       },
     ],
@@ -531,14 +539,20 @@ export default async function Page({ params }: { params: Promise<{ lang: string 
                     <p className="text-lg font-semibold text-primary">{s.title}</p>
                     <p className="mt-2 text-sm text-[rgba(43,43,43,0.70)]">{s.lead}</p>
                     <div className="mt-4 flex flex-wrap gap-2 text-xs text-[rgba(43,43,43,0.72)]">
-                      <span className="inline-flex items-center gap-2 rounded-full border border-sand bg-white/60 px-3 py-1">
-                        <Code2 className="h-3.5 w-3.5 text-[var(--color-accent)]" strokeWidth={2.2} />
-                        WordPress / code
-                      </span>
-                      <span className="inline-flex items-center gap-2 rounded-full border border-sand bg-white/60 px-3 py-1">
-                        <CheckCircle2 className="h-3.5 w-3.5 text-[var(--color-accent)]" strokeWidth={2.2} />
-                        Conseil & exécution
-                      </span>
+                      {(s as any).tags?.slice(0, 2).map((tag: string, idx: number) => {
+                        const Icon = idx === 0 ? CheckCircle2 : Sparkles;
+                        return (
+                        <span
+                          key={tag}
+                          className="inline-flex items-center gap-2 rounded-full border border-sand bg-white/60 px-3 py-1"
+                        >
+                          <Icon
+                            className="h-3.5 w-3.5 text-[var(--color-accent)]"
+                            strokeWidth={2.2}
+                          />
+                          {tag}
+                        </span>
+                      )})}
                     </div>
                   </div>
                 </div>
